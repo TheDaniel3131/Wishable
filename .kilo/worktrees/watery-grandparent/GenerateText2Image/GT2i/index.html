@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Text to Image Watermark Generator</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 40px;
+            background: #f0f0f0;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            font-size: 18px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        /* The checkerboard makes it easy to see the transparency */
+        .canvas-container {
+            background-image: repeating-linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%, #ccc),
+                repeating-linear-gradient(45deg, #ccc 25%, #fff 25%, #fff 75%, #ccc 75%, #ccc);
+            background-position: 0 0, 10px 10px;
+            background-size: 20px 20px;
+            display: inline-block;
+            border: 1px solid #999;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Text to Image Watermark Generator</h2>
+
+    <div class="controls">
+        <input type="text" id="customText" value="CRN" placeholder="Type watermark text here...">
+    </div>
+
+    <div class="canvas-container">
+        <!-- Canvas is 1000x500 -->
+        <canvas id="watermarkCanvas" width="1000" height="500"></canvas>
+    </div>
+
+    <br>
+    <button onclick="downloadImage()">Download PNG</button>
+
+    <script>
+        const canvas = document.getElementById('watermarkCanvas');
+        const ctx = canvas.getContext('2d');
+        const textInput = document.getElementById('customText');
+
+        function drawCanvas() {
+            const text = textInput.value || ' ';
+
+            // 1. Clear previous drawings
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 2. Start with default max font size
+            let fontSize = 400;
+            ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+
+            // Auto-shrink font if text is wider than the canvas
+            const textWidth = ctx.measureText(text).width;
+            if (textWidth > canvas.width - 40) {
+                fontSize = Math.floor(fontSize * ((canvas.width - 40) / textWidth));
+                ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+            }
+
+            // 3. Set alignment
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // 4. Set text color to Grey with 80% Opacity (0.8 Alpha based on your code)
+            ctx.fillStyle = 'rgba(128, 128, 128, 0.8)';
+
+            // 5. Draw the text perfectly centered
+            ctx.fillText(text, canvas.width / 2, canvas.height / 2 + 10);
+        }
+
+        // Redraw whenever the user types
+        textInput.addEventListener('input', drawCanvas);
+
+        // Initial draw on page load
+        drawCanvas();
+
+        // Function to trigger the download
+        function downloadImage() {
+            const rawText = textInput.value.trim() || 'watermark';
+            // Clean up the text so it's safe for a filename
+            const safeName = rawText.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+
+            const link = document.createElement('a');
+            link.download = `${safeName}_watermark.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+
+</body>
+
+</html>

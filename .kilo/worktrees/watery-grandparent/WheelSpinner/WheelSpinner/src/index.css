@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+/* 1. RESET DEFAULT BROWSER/VITE STYLES */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%; /* Changed from strictly 100% to min-height */
+  overflow-x: hidden; /* Hide horizontal scrollbars, but allow vertical on mobile */
+  background-color: #1c2030; 
+}
+
+/* 2. YOUR CUSTOM SCROLLBAR FOR THE LIST */
+.slim-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #5379AE transparent;
+}
+
+.slim-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.slim-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.slim-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #5379AE;
+  border-radius: 10px;
+}
+.slim-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #A8C4EC;
+}

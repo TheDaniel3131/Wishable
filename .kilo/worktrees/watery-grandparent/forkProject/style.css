@@ -1,0 +1,215 @@
+/* Main Background - Slate 950 */
+.stApp {
+    background-color: #0f172a;
+    font-family: 'Inter', sans-serif;
+    color: #e2e8f0;
+}
+
+/* Sidebar Styling */
+[data-testid="stSidebar"] {
+    background-color: rgba(15, 23, 42, 0.95);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Titles */
+h1 {
+    color: #ffffff;
+    font-weight: 700;
+    letter-spacing: -1px;
+    /* FIX: Aggressively reduce top margin on H1 */
+    margin-top: 0em !important; 
+    padding-top: 0em !important;
+}
+h1 span {
+    color: #22d3ee; /* Cyan 400 */
+}
+
+/* --- ANIMATION KEYFRAME --- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- NAVIGATION BAR STYLING (Cyan Pill Look with Smooth Transition) --- */
+
+/* 1. The Container */
+div[role="radiogroup"] {
+    display: flex;
+    justify-content: flex-start;
+    background-color: transparent !important;
+    border: none !important;
+    gap: 15px; /* Space between the pills */
+    padding: 10px 0; /* Vertical padding around the buttons */
+    margin-bottom: 0 !important; 
+    margin-left: -5px !important;
+    border-bottom: none !important; /* Remove the underline divider */
+}
+
+/* 2. Hide the Radio Buttons */
+div[role="radiogroup"] label > div:first-child {
+    display: none !important;
+}
+
+/* 3. The Text Labels (Inactive State - Dark Gray Pill) */
+div[role="radiogroup"] label {
+    background-color: transparent !important; /* Default transparent background */
+    border: 1px solid #334155; /* Subtle border for definition */
+    padding: 6px 15px 6px 15px !important; /* Padding for button size */
+    
+    color: #64748b !important; /* Dark grey text */
+    font-weight: 600 !important;
+    font-size: 1.1rem !important;
+    text-transform: none !important;
+    
+    border-radius: 9999px !important; /* Full pill shape */
+    margin: 0 !important;
+    transition: all 0.3s ease; /* Smooth transition for background/color change */
+    text-shadow: none !important; 
+}
+
+/* 4. The Active Tab (Selected State - CYAN Pill) */
+div[role="radiogroup"] label[data-checked="true"] {
+    background-color: #22d3ee !important; /* ***CYAN BACKGROUND (Active Color)*** */
+    border: 1px solid #22d3ee !important;
+    color: #0f172a !important; /* Dark text for contrast against cyan pill */
+    text-shadow: none !important;
+}
+
+/* Hover Effect */
+div[role="radiogroup"] label:hover {
+    color: #cbd5e1 !important; 
+    background-color: rgba(255, 255, 255, 0.1) !important; /* Slight background tint on hover */
+    text-shadow: none !important;
+}
+
+/* --- USER-PROVIDED SVG AND ANIMATION STYLES (Retained for completeness) --- */
+
+.icon{
+    width: 2.6em;
+    height: 2.6em;
+    stroke: white;
+    fill: transparent;
+    stroke-width: 1pt;
+    stroke-miterlimit: 10;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 400;
+}
+
+.menu__item.action .icon{
+    animation: strok 1.5s reverse;
+}
+
+@keyframes strok {
+    100%{
+        stroke-dashoffset: 400;
+    }
+}
+
+.menu__border{
+    left: 0;
+    bottom: 99;
+    width: 10.9em;
+    height: 2.4em;
+    position: absolute;
+    clip-path: url(#menu); 
+    will-change: transform;
+    background-color: #22d3ee; 
+    transition: transform 0.3s ease;
+}
+
+.svg-container{
+    width: 0;
+    height: 0;
+}
+
+@media screen and (max-width:50em) {
+    .menu{
+        font-size: 0.8em;
+    }
+}
+
+/* --- REST OF STYLES --- */
+.stNumberInput input {
+    background-color: rgba(30, 41, 59, 0.6) !important;
+    color: white !important;
+    border: 1px solid rgba(148, 163, 184, 0.2) !important;
+    border-radius: 8px !important;
+}
+
+.stNumberInput input:focus {
+    border-color: #06b6d4 !important;
+    box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2) !important;
+}
+
+/* --- BIG SEARCH/MANUAL INPUT (FIXED ALIGNMENT) --- */
+.stTextInput input {
+    background-color: rgba(30, 41, 59, 0.6) !important;
+    color: #22d3ee !important; 
+    border: 1px solid rgba(148, 163, 184, 0.2) !important;
+    border-radius: 12px !important;
+    
+    font-size: 1.8rem !important;  
+    padding: 0.5rem 1rem !important; 
+   
+    font-family: 'JetBrains Mono', monospace !important; 
+    font-weight: 700 !important;
+}
+
+/* CRUCIAL FIX: Targetting the inner container to force vertical centering */
+.stTextInput > div > div {
+    /* Set the desired height based on font size + padding */
+    line-height: 2.5rem !important; 
+}
+
+.stTextInput input:focus {
+    border-color: #22d3ee !important; 
+    box-shadow: 0 0 15px rgba(34, 211, 238, 0.2) !important; 
+}
+
+/* Label for Search Box */
+.stTextInput label p {
+    font-size: 1.1rem !important;
+    color: #94a3b8 !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+div[data-testid="metric-container"] {
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.05);
+    transition: all 0.3s ease;
+}
+
+div[data-testid="metric-container"]:hover {
+    background: rgba(30, 41, 59, 0.9);
+    border-left: 3px solid #22d3ee;
+}
+
+label[data-testid="stMetricLabel"] {
+    color: #94a3b8;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+div[data-testid="stMetricValue"] {
+    color: #f8fafc;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+}
+
+hr {
+    border-color: #334155 !important;
+}
+
+.stAlert {
+    background-color: rgba(30, 41, 59, 0.7);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}

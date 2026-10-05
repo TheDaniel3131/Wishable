@@ -1,0 +1,95 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #FAFAF8;
+  --bg-card:   #FFFFFF;
+  --bg-hover:  #F4F3F0;
+  --bg-input:  #F7F6F3;
+  --border:    #E8E6E0;
+  --border-focus: #1A1A18;
+  --text:      #1A1A18;
+  --text-2:    #6B6962;
+  --text-3:    #9B9890;
+  --accent:    #2E6AF6;
+  --accent-bg: #EBF0FE;
+  --accent-text: #1A4CC4;
+  --success:   #12A36A;
+  --success-bg:#E6F7F1;
+  --danger:    #E03E3E;
+  --danger-bg: #FDEAEA;
+  --warning:   #D97706;
+  --radius:    10px;
+  --radius-lg: 16px;
+  --shadow:    0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --font:      'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --titlebar:  28px;
+}
+
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+/* Titlebar drag region */
+.titlebar {
+  height: var(--titlebar);
+  -webkit-app-region: drag;
+  flex-shrink: 0;
+}
+
+button {
+  font-family: var(--font);
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+input, textarea {
+  font-family: var(--font);
+  outline: none;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
+
+/* Animations */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60%  { transform: translateX(-6px); }
+  40%, 80%  { transform: translateX(6px); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in  { animation: fade-in  0.25s ease forwards; }
+.animate-slide-up { animation: slide-up 0.2s ease forwards; }
+.animate-pop-in   { animation: pop-in   0.18s ease forwards; }

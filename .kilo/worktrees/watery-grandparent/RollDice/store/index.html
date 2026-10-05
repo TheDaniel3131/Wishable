@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Insane 3D Dice Roller</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #0f0f1b; font-family: sans-serif; }
+    #ui { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 10; }
+    button {
+      background: linear-gradient(45deg, #ff007f, #7000ff);
+      color: white; border: none; padding: 18px 40px;
+      font-size: 1.5rem; font-weight: 900; border-radius: 12px;
+      cursor: pointer; text-transform: uppercase;
+      box-shadow: 0 8px 25px rgba(255, 0, 127, 0.5);
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    button:active { transform: scale(0.95); box-shadow: 0 4px 15px rgba(255, 0, 127, 0.5); }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="ui">
+      <button @click="rollDice">Roll The Dice</button>
+    </div>
+    <div ref="canvasContainer"></div>
+  </div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "cannon-es": "https://unpkg.com/cannon-es@0.20.0/dist/cannon-es.js"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import { createApp, ref, onMounted } from 'vue';
+    import * as THREE from 'three';
+    import * as CANNON from 'cannon-es';
+
+    createApp({
+      setup() {
+        const canvasContainer = ref(null);
+        let diceBody, diceMesh;
+
+        const init3D = () => {
+          // Three.js Scene Setup
+          const scene = new THREE.Scene();
+          scene.fog = new THREE.Fog(0x0f0f1b, 10, 30);
+          
+          const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+          camera.position.set(0, 12, 15);
+          camera.lookAt(0, 0, 0);
+
+          const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+          renderer.setSize(window.innerWidth, window.innerHeight);
+          renderer.shadowMap.enabled = true;
+          canvasContainer.value.appendChild(renderer.domElement);
+
+          // Vibrant Lighting
+          const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+          scene.add(ambient);
+
+          const pinkLight = new THREE.PointLight(0xff007f, 500, 50);
+          pinkLight.position.set(5, 10, 5);
+          pinkLight.castShadow = true;
+          scene.add(pinkLight);
+
+          const blueLight = new THREE.PointLight(0x00f0ff, 500, 50);
+          blueLight.position.set(-5, 5, -5);
+          scene.add(blueLight);
+
+          // Cannon.js Physics World
+          const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -30, 0) });
+          world.broadphase = new CANNON.SAPBroadphase(world);
+
+          // Physical Floor
+          const floorMat = new CANNON.Material();
+          const floorBody = new CANNON.Body({
+            mass: 0,
+            shape: new CANNON.Plane(),
+            material: floorMat
+          });
+          floorBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
+          world.addBody(floorBody);
+
+          // Visual Floor
+          const floorMesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(100, 100),
+            new THREE.MeshStandardMaterial({ color: 0x151525, roughness: 0.1, metalness: 0.5 })
+          );
+          floorMesh.rotation.x = -Math.PI / 2;
+          floorMesh.receiveShadow = true;
+          scene.add(floorMesh);
+
+          // Physical Dice
+          const diceSize = 1.5;
+          const diceMat = new CANNON.Material();
+          diceBody = new CANNON.Body({
+            mass: 1,
+            shape: new CANNON.Box(new CANNON.Vec3(diceSize/2, diceSize/2, diceSize/2)),
+            material: diceMat
+          });
+          world.addBody(diceBody);
+
+          // Bouncy Contact Material
+          const contactMat = new CANNON.ContactMaterial(floorMat, diceMat, { friction: 0.3, restitution: 0.7 });
+          world.addContactMaterial(contactMat);
+
+          // Visual Dice
+          const geometry = new THREE.BoxGeometry(diceSize, diceSize, diceSize);
+          const material = new THREE.MeshStandardMaterial({ 
+            color: 0xffffff, 
+            roughness: 0.1, 
+            metalness: 0.1 
+          });
+          diceMesh = new THREE.Mesh(geometry, material);
+          diceMesh.castShadow = true;
+          scene.add(diceMesh);
+
+          // Animation Loop
+          const timeStep = 1 / 60;
+          const animate = () => {
+            requestAnimationFrame(animate);
+            world.step(timeStep);
+            
+            // Sync physics data to visual mesh
+            diceMesh.position.copy(diceBody.position);
+            diceMesh.quaternion.copy(diceBody.quaternion);
+            
+            renderer.render(scene, camera);
+          };
+          
+          animate();
+
+          window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+          });
+        };
+
+        const rollDice = () => {
+          if (!diceBody) return;
+          
+          // Reset position high above origin
+          diceBody.position.set(0, 10, 0);
+          
+          // Apply randomized vectors for linear and angular velocity
+          diceBody.velocity.set(
+            (Math.random() - 0.5) * 15,
+            15,
+            (Math.random() - 0.5) * 15
+          );
+          diceBody.angularVelocity.set(
+            Math.random() * 20 * (Math.random() > 0.5 ? 1 : -1),
+            Math.random() * 20 * (Math.random() > 0.5 ? 1 : -1),
+            Math.random() * 20 * (Math.random() > 0.5 ? 1 : -1)
+          );
+        };
+
+        onMounted(() => {
+          init3D();
+          rollDice();
+        });
+
+        return { canvasContainer, rollDice };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

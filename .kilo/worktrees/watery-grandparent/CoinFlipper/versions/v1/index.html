@@ -1,0 +1,4030 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CoinFlipper</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Cinzel+Decorative:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap"
+        rel="stylesheet" />
+    <style>
+        @import "https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Cinzel+Decorative:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap";
+
+        *,
+        :before,
+        :after {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            background: #07060a;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        #app {
+            z-index: 1;
+            position: relative;
+        }
+
+        button {
+            font-family: inherit;
+        }
+
+        .coin-scene.svelte-ct3afm {
+            perspective: 800px;
+            width: 160px;
+            height: 160px;
+        }
+
+        .coin.svelte-ct3afm {
+            width: 160px;
+            height: 160px;
+            transform-style: preserve-3d;
+            cursor: default;
+            transition: transform 0.1s;
+            position: relative;
+            transform: rotateY(0);
+        }
+
+        .coin.show-tails.svelte-ct3afm {
+            transform: rotateY(180deg);
+        }
+
+        .coin.flipping.svelte-ct3afm {
+            animation: 1.3s cubic-bezier(0.4, 0, 0.2, 1) forwards svelte-ct3afm-coin-flip;
+        }
+
+        @keyframes svelte-ct3afm-coin-flip {
+            0% {
+                transform: rotateY(0) translateY(0);
+            }
+
+            20% {
+                transform: rotateY(360deg) translateY(-40px);
+            }
+
+            40% {
+                transform: rotateY(720deg) translateY(-60px);
+            }
+
+            60% {
+                transform: rotateY(900deg) translateY(-30px);
+            }
+
+            80% {
+                transform: rotateY(1020deg) translateY(-10px);
+            }
+
+            to {
+                transform: rotateY(1080deg) translateY(0);
+            }
+        }
+
+        .face.svelte-ct3afm {
+            backface-visibility: hidden;
+            border-radius: 50%;
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            box-shadow:
+                0 0 0 2px #c9a84c33,
+                0 8px 40px #000000b3,
+                0 2px 8px #00000080,
+                inset 0 1px #f5d78e26;
+        }
+
+        .tails.svelte-ct3afm {
+            transform: rotateY(180deg);
+        }
+
+        .coin-glow.svelte-ct3afm {
+            pointer-events: none;
+            background: radial-gradient(circle, #c9a84c1f 0%, #0000 70%);
+            border-radius: 50%;
+            animation: 3s ease-in-out infinite svelte-ct3afm-pulse-glow;
+            position: absolute;
+            inset: -10px;
+        }
+
+        @keyframes svelte-ct3afm-pulse-glow {
+
+            0%,
+            to {
+                opacity: 0.6;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+        }
+
+        .stats-panel.svelte-1lr08k {
+            background: var(--bg2);
+            border-radius: var(--radius, 14px);
+            border: 1px solid #c9a84c1a;
+            flex-direction: column;
+            gap: 1rem;
+            width: 100%;
+            padding: 1.2rem;
+            display: flex;
+        }
+
+        .stats-header.svelte-1lr08k {
+            letter-spacing: 0.28em;
+            color: var(--fg-dim);
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.58rem;
+            display: flex;
+        }
+
+        .reset-btn.svelte-1lr08k {
+            color: var(--fg-dim);
+            letter-spacing: 0.2em;
+            cursor: pointer;
+            background: 0 0;
+            border: 1px solid #c9a84c26;
+            border-radius: 100px;
+            align-items: center;
+            gap: 0.35rem;
+            margin-left: auto;
+            padding: 0.3rem 0.65rem;
+            font-family: Cinzel, serif;
+            font-size: 0.52rem;
+            transition: all 0.2s;
+            display: flex;
+        }
+
+        .reset-btn.svelte-1lr08k:hover {
+            color: var(--gold);
+            border-color: #c9a84c59;
+        }
+
+        .stat-grid.svelte-1lr08k {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            display: grid;
+        }
+
+        .stat-item.svelte-1lr08k {
+            background: #ffffff05;
+            border: 1px solid #c9a84c0f;
+            border-radius: 8px;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.7rem 0.4rem;
+            display: flex;
+        }
+
+        .stat-val.svelte-1lr08k {
+            color: var(--fg);
+            font-size: 1.4rem;
+            font-weight: 600;
+            line-height: 1;
+        }
+
+        .stat-val.streak.svelte-1lr08k {
+            color: var(--gold);
+        }
+
+        .stat-key.svelte-1lr08k {
+            letter-spacing: 0.22em;
+            color: var(--fg-dim);
+            font-size: 0.52rem;
+        }
+
+        .bar-section.svelte-1lr08k {
+            flex-direction: column;
+            gap: 0.4rem;
+            display: flex;
+        }
+
+        .bar-labels.svelte-1lr08k {
+            letter-spacing: 0.12em;
+            color: var(--fg-dim);
+            justify-content: space-between;
+            font-size: 0.58rem;
+            display: flex;
+        }
+
+        .bar-track.svelte-1lr08k {
+            background: #ffffff0f;
+            border-radius: 4px;
+            height: 4px;
+            overflow: hidden;
+        }
+
+        .bar-fill.svelte-1lr08k {
+            background: linear-gradient(90deg, var(--gold), var(--gold-light));
+            border-radius: 4px;
+            height: 100%;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .streak-notice.svelte-1lr08k {
+            letter-spacing: 0.2em;
+            color: var(--gold);
+            opacity: 0.8;
+            align-items: center;
+            gap: 0.45rem;
+            font-size: 0.6rem;
+            animation: 2s ease-in-out infinite svelte-1lr08k-pulse-text;
+            display: flex;
+        }
+
+        @keyframes svelte-1lr08k-pulse-text {
+
+            0%,
+            to {
+                opacity: 0.7;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .flash.svelte-1tpupto {
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
+            white-space: nowrap;
+            z-index: 20;
+            border: 1px solid;
+            border-radius: 100px;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.8rem 1.4rem;
+            animation: 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards svelte-1tpupto-flash-in;
+            display: flex;
+            position: absolute;
+            bottom: -90px;
+            left: 50%;
+            transform: translate(-50%);
+        }
+
+        .flash.svelte-1tpupto:not(.win):not(.lose) {
+            color: var(--gold-light, #f5d78e);
+            background: #c9a84c1a;
+            border-color: #c9a84c66;
+        }
+
+        .flash.win.svelte-1tpupto {
+            color: #81c784;
+            background: #4caf501a;
+            border-color: #4caf5080;
+        }
+
+        .flash.lose.svelte-1tpupto {
+            color: #ef9a9a;
+            background: #e539351a;
+            border-color: #e5393580;
+        }
+
+        .flash-text.svelte-1tpupto {
+            flex-direction: column;
+            display: flex;
+        }
+
+        .label.svelte-1tpupto {
+            letter-spacing: 0.25em;
+            font-family: Cinzel, serif;
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+
+        .sub.svelte-1tpupto {
+            opacity: 0.7;
+            letter-spacing: 0.1em;
+            font-family:
+                Cormorant Garamond,
+                serif;
+            font-size: 0.7rem;
+            font-style: italic;
+        }
+
+        @keyframes svelte-1tpupto-flash-in {
+            0% {
+                opacity: 0;
+                transform: translate(-50%) translateY(10px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translate(-50%) translateY(0) scale(1);
+            }
+        }
+
+        canvas.svelte-rmxd5u {
+            pointer-events: none;
+            z-index: 0;
+            position: fixed;
+            inset: 0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --gold: #c9a84c;
+            --gold-light: #f5d78e;
+            --gold-dim: #6a5828;
+            --bg: #07060a;
+            --bg2: #100e15;
+            --bg3: #181520;
+            --fg: #e8dfc8;
+            --fg-dim: #7a7060;
+            --radius: 14px;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--fg);
+            min-height: 100vh;
+            font-family: Cinzel, serif;
+            overflow-x: hidden;
+        }
+
+        main.svelte-1n46o8q {
+            opacity: 0;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.75rem;
+            max-width: 460px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 5rem;
+            transition:
+                opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            transform: translateY(24px);
+        }
+
+        main.mounted.svelte-1n46o8q {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        header.svelte-1n46o8q {
+            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
+            background: #ffffff04;
+            border: 1px solid #c9a84c2e;
+            border-radius: 100px;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.7rem 1.4rem;
+            display: flex;
+        }
+
+        .wordmark.svelte-1n46o8q {
+            letter-spacing: 0.35em;
+            color: var(--gold);
+            text-shadow: 0 0 25px #c9a84c8c;
+            font-family:
+                Cinzel Decorative,
+                serif;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .divider-v.svelte-1n46o8q {
+            background: #c9a84c40;
+            width: 1px;
+            height: 14px;
+        }
+
+        .tagline.svelte-1n46o8q {
+            color: var(--fg-dim);
+            letter-spacing: 0.08em;
+            font-family:
+                Cormorant Garamond,
+                serif;
+            font-size: 0.78rem;
+            font-style: italic;
+        }
+
+        .arena.svelte-1n46o8q {
+            justify-content: center;
+            align-items: center;
+            width: 320px;
+            height: 320px;
+            display: flex;
+            position: relative;
+        }
+
+        .oracle-ring.svelte-1n46o8q {
+            justify-content: center;
+            align-items: center;
+            display: flex;
+            position: absolute;
+            inset: 0;
+        }
+
+        .oracle-ring.spinning.svelte-1n46o8q {
+            animation: 1.2s linear infinite svelte-1n46o8q-ring-rotate;
+        }
+
+        @keyframes svelte-1n46o8q-ring-rotate {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .ring-svg.svelte-1n46o8q {
+            position: absolute;
+        }
+
+        .coin-wrapper.svelte-1n46o8q {
+            z-index: 2;
+            position: relative;
+        }
+
+        .choice-row.svelte-1n46o8q {
+            flex-direction: column;
+            align-items: center;
+            gap: 0.7rem;
+            width: 100%;
+            display: flex;
+        }
+
+        .choice-label.svelte-1n46o8q {
+            letter-spacing: 0.3em;
+            color: var(--fg-dim);
+            font-size: 0.58rem;
+        }
+
+        .choice-btns.svelte-1n46o8q {
+            gap: 0.7rem;
+            width: 100%;
+            display: flex;
+        }
+
+        .choice-btn.svelte-1n46o8q {
+            background: var(--bg2);
+            border-radius: var(--radius);
+            color: var(--fg-dim);
+            letter-spacing: 0.18em;
+            cursor: pointer;
+            border: 1px solid #c9a84c1f;
+            flex: 1;
+            justify-content: center;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.9rem;
+            font-family: Cinzel, serif;
+            font-size: 0.68rem;
+            transition: all 0.2s;
+            display: flex;
+        }
+
+        .choice-btn.svelte-1n46o8q:hover {
+            color: var(--gold);
+            background: #c9a84c0a;
+            border-color: #c9a84c59;
+        }
+
+        .choice-btn.selected.svelte-1n46o8q {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: #c9a84c14;
+            box-shadow:
+                0 0 22px #c9a84c2e,
+                inset 0 0 16px #c9a84c0a;
+        }
+
+        .flip-btn.svelte-1n46o8q {
+            border: 1px solid var(--gold-dim);
+            border-radius: var(--radius);
+            width: 100%;
+            color: var(--gold);
+            letter-spacing: 0.28em;
+            cursor: pointer;
+            background: linear-gradient(135deg,
+                    #18140e 0%,
+                    #221b0f 50%,
+                    #18140e 100%);
+            padding: 1.1rem;
+            font-family: Cinzel, serif;
+            font-size: 0.78rem;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flip-btn.svelte-1n46o8q:before {
+            content: "";
+            background: linear-gradient(105deg,
+                    #0000 35%,
+                    #f5d78e12 50%,
+                    #0000 65%);
+            transition: transform 0.55s;
+            position: absolute;
+            inset: 0;
+            transform: translate(-120%);
+        }
+
+        .flip-btn.svelte-1n46o8q:hover:not(:disabled):before {
+            transform: translate(120%);
+        }
+
+        .flip-btn.svelte-1n46o8q:hover:not(:disabled) {
+            border-color: var(--gold);
+            color: var(--gold-light);
+            box-shadow:
+                0 0 32px #c9a84c47,
+                0 4px 24px #0006;
+        }
+
+        .flip-btn.svelte-1n46o8q:disabled {
+            cursor: not-allowed;
+            opacity: 0.65;
+        }
+
+        .flip-inner.svelte-1n46o8q {
+            justify-content: center;
+            align-items: center;
+            gap: 0.65rem;
+            display: flex;
+        }
+
+        .spin-icon.svelte-1n46o8q {
+            animation: 0.75s linear infinite svelte-1n46o8q-spin;
+        }
+
+        @keyframes svelte-1n46o8q-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app"></div>
+    <script>
+        (function () {
+            let e = document.createElement(`link`).relList;
+            if (e && e.supports && e.supports(`modulepreload`)) return;
+            for (let e of document.querySelectorAll(`link[rel="modulepreload"]`))
+                n(e);
+            new MutationObserver((e) => {
+                for (let t of e)
+                    if (t.type === `childList`)
+                        for (let e of t.addedNodes)
+                            e.tagName === `LINK` && e.rel === `modulepreload` && n(e);
+            }).observe(document, { childList: !0, subtree: !0 });
+            function t(e) {
+                let t = {};
+                return (
+                    e.integrity && (t.integrity = e.integrity),
+                    e.referrerPolicy && (t.referrerPolicy = e.referrerPolicy),
+                    e.crossOrigin === `use-credentials`
+                        ? (t.credentials = `include`)
+                        : e.crossOrigin === `anonymous`
+                            ? (t.credentials = `omit`)
+                            : (t.credentials = `same-origin`),
+                    t
+                );
+            }
+            function n(e) {
+                if (e.ep) return;
+                e.ep = !0;
+                let n = t(e);
+                fetch(e.href, n);
+            }
+        })();
+        var e = Array.isArray,
+            t = Array.prototype.indexOf,
+            n = Array.prototype.includes,
+            r = Array.from,
+            i = Object.defineProperty,
+            a = Object.getOwnPropertyDescriptor,
+            o = Object.getOwnPropertyDescriptors,
+            s = Object.prototype,
+            c = Array.prototype,
+            l = Object.getPrototypeOf,
+            u = Object.isExtensible,
+            d = () => { };
+        function f(e) {
+            return e();
+        }
+        function p(e) {
+            for (var t = 0; t < e.length; t++) e[t]();
+        }
+        function m() {
+            var e, t;
+            return {
+                promise: new Promise((n, r) => {
+                    ((e = n), (t = r));
+                }),
+                resolve: e,
+                reject: t,
+            };
+        }
+        var h = 1024,
+            g = 2048,
+            _ = 4096,
+            v = 8192,
+            y = 16384,
+            b = 32768,
+            x = 1 << 25,
+            S = 65536,
+            ee = 1 << 19,
+            C = 1 << 20,
+            te = 1 << 25,
+            ne = 65536,
+            re = 1 << 21,
+            ie = 1 << 22,
+            ae = 1 << 23,
+            w = Symbol(`$state`),
+            oe = Symbol(`legacy props`),
+            se = Symbol(``),
+            ce = new (class extends Error {
+                name = `StaleReactionError`;
+                message =
+                    "The reaction that called `getAbortSignal()` was re-run or destroyed";
+            })(),
+            le =
+                !!globalThis.document?.contentType &&
+                globalThis.document.contentType.includes(`xml`);
+        function ue(e) {
+            throw Error(`https://svelte.dev/e/lifecycle_outside_component`);
+        }
+        function de() {
+            throw Error(`https://svelte.dev/e/async_derived_orphan`);
+        }
+        function fe(e, t, n) {
+            throw Error(`https://svelte.dev/e/each_key_duplicate`);
+        }
+        function pe(e) {
+            throw Error(`https://svelte.dev/e/effect_in_teardown`);
+        }
+        function me() {
+            throw Error(`https://svelte.dev/e/effect_in_unowned_derived`);
+        }
+        function he(e) {
+            throw Error(`https://svelte.dev/e/effect_orphan`);
+        }
+        function ge() {
+            throw Error(`https://svelte.dev/e/effect_update_depth_exceeded`);
+        }
+        function _e(e) {
+            throw Error(`https://svelte.dev/e/props_invalid_value`);
+        }
+        function ve() {
+            throw Error(`https://svelte.dev/e/state_descriptors_fixed`);
+        }
+        function ye() {
+            throw Error(`https://svelte.dev/e/state_prototype_fixed`);
+        }
+        function be() {
+            throw Error(`https://svelte.dev/e/state_unsafe_mutation`);
+        }
+        function xe() {
+            throw Error(`https://svelte.dev/e/svelte_boundary_reset_onerror`);
+        }
+        var Se = {},
+            T = Symbol(),
+            Ce = `http://www.w3.org/1999/xhtml`;
+        function we(e) {
+            console.warn(`https://svelte.dev/e/hydration_mismatch`);
+        }
+        function Te() {
+            console.warn(`https://svelte.dev/e/svelte_boundary_reset_noop`);
+        }
+        var E = !1;
+        function Ee(e) {
+            E = e;
+        }
+        var D;
+        function O(e) {
+            if (e === null) throw (we(), Se);
+            return (D = e);
+        }
+        function De() {
+            return O(Qt(D));
+        }
+        function k(e) {
+            if (E) {
+                if (Qt(D) !== null) throw (we(), Se);
+                D = e;
+            }
+        }
+        function Oe(e = 1) {
+            if (E) {
+                for (var t = e, n = D; t--;) n = Qt(n);
+                D = n;
+            }
+        }
+        function ke(e = !0) {
+            for (var t = 0, n = D; ;) {
+                if (n.nodeType === 8) {
+                    var r = n.data;
+                    if (r === `]`) {
+                        if (t === 0) return n;
+                        --t;
+                    } else
+                        (r === `[` ||
+                            r === `[!` ||
+                            (r[0] === `[` && !isNaN(Number(r.slice(1))))) &&
+                            (t += 1);
+                }
+                var i = Qt(n);
+                (e && n.remove(), (n = i));
+            }
+        }
+        function Ae(e) {
+            if (!e || e.nodeType !== 8) throw (we(), Se);
+            return e.data;
+        }
+        function je(e) {
+            return e === this.v;
+        }
+        function Me(e, t) {
+            return e == e
+                ? e !== t || (typeof e == `object` && !!e) || typeof e == `function`
+                : t == t;
+        }
+        function Ne(e) {
+            return !Me(e, this.v);
+        }
+        var Pe = !1,
+            Fe = !1;
+        function Ie() {
+            Fe = !0;
+        }
+        var A = null;
+        function Le(e) {
+            A = e;
+        }
+        function Re(e, t = !1, n) {
+            A = {
+                p: A,
+                i: !1,
+                c: null,
+                e: null,
+                s: e,
+                x: null,
+                r: H,
+                l: Fe && !t ? { s: null, u: null, $: [] } : null,
+            };
+        }
+        function ze(e) {
+            var t = A,
+                n = t.e;
+            if (n !== null) {
+                t.e = null;
+                for (var r of n) fn(r);
+            }
+            return (e !== void 0 && (t.x = e), (t.i = !0), (A = t.p), e ?? {});
+        }
+        function Be() {
+            return !Fe || (A !== null && A.l === null);
+        }
+        var Ve = [];
+        function He() {
+            var e = Ve;
+            ((Ve = []), p(e));
+        }
+        function Ue(e) {
+            if (Ve.length === 0 && !tt) {
+                var t = Ve;
+                queueMicrotask(() => {
+                    t === Ve && He();
+                });
+            }
+            Ve.push(e);
+        }
+        function We(e) {
+            var t = H;
+            if (t === null) return ((B.f |= ae), e);
+            if (!(t.f & 32768) && !(t.f & 4)) throw e;
+            Ge(e, t);
+        }
+        function Ge(e, t) {
+            for (; t !== null;) {
+                if (t.f & 128) {
+                    if (!(t.f & 32768)) throw e;
+                    try {
+                        t.b.error(e);
+                        return;
+                    } catch (t) {
+                        e = t;
+                    }
+                }
+                t = t.parent;
+            }
+            throw e;
+        }
+        var Ke = ~(g | _ | h);
+        function j(e, t) {
+            e.f = (e.f & Ke) | t;
+        }
+        function qe(e) {
+            e.f & 512 || e.deps === null ? j(e, h) : j(e, _);
+        }
+        function Je(e) {
+            if (e !== null)
+                for (let t of e)
+                    !(t.f & 2) || !(t.f & 65536) || ((t.f ^= ne), Je(t.deps));
+        }
+        function Ye(e, t, n) {
+            (e.f & 2048 ? t.add(e) : e.f & 4096 && n.add(e), Je(e.deps), j(e, h));
+        }
+        var Xe = !1,
+            Ze = !1;
+        function Qe(e) {
+            var t = Ze;
+            try {
+                return ((Ze = !1), [e(), Ze]);
+            } finally {
+                Ze = t;
+            }
+        }
+        var $e = new Set(),
+            M = null,
+            N = null,
+            et = null,
+            tt = !1,
+            nt = !1,
+            rt = null,
+            it = null,
+            at = 0,
+            ot = 1,
+            st = class e {
+                id = ot++;
+                current = new Map();
+                previous = new Map();
+                #e = new Set();
+                #t = new Set();
+                #n = new Map();
+                #r = new Map();
+                #i = null;
+                #a = [];
+                #o = [];
+                #s = new Set();
+                #c = new Set();
+                #l = new Map();
+                #u = new Set();
+                is_fork = !1;
+                #d = !1;
+                #f = new Set();
+                #p() {
+                    return this.is_fork || this.#r.size > 0;
+                }
+                #m() {
+                    for (let n of this.#f)
+                        for (let r of n.#r.keys()) {
+                            for (var e = !1, t = r; t.parent !== null;) {
+                                if (this.#l.has(t)) {
+                                    e = !0;
+                                    break;
+                                }
+                                t = t.parent;
+                            }
+                            if (!e) return !0;
+                        }
+                    return !1;
+                }
+                skip_effect(e) {
+                    (this.#l.has(e) || this.#l.set(e, { d: [], m: [] }),
+                        this.#u.delete(e));
+                }
+                unskip_effect(e, t = (e) => this.schedule(e)) {
+                    var n = this.#l.get(e);
+                    if (n) {
+                        this.#l.delete(e);
+                        for (var r of n.d) (j(r, g), t(r));
+                        for (r of n.m) (j(r, _), t(r));
+                    }
+                    this.#u.add(e);
+                }
+                #h() {
+                    if ((at++ > 1e3 && ($e.delete(this), ct()), !this.#p())) {
+                        for (let e of this.#s)
+                            (this.#c.delete(e), j(e, g), this.schedule(e));
+                        for (let e of this.#c) (j(e, _), this.schedule(e));
+                    }
+                    let t = this.#a;
+                    ((this.#a = []), this.apply());
+                    var n = (rt = []),
+                        r = [],
+                        i = (it = []);
+                    for (let e of t)
+                        try {
+                            this.#g(e, n, r);
+                        } catch (t) {
+                            throw (ht(e), t);
+                        }
+                    if (((M = null), i.length > 0)) {
+                        var a = e.ensure();
+                        for (let e of i) a.schedule(e);
+                    }
+                    if (((rt = null), (it = null), this.#p() || this.#m())) {
+                        (this.#_(r), this.#_(n));
+                        for (let [e, t] of this.#l) mt(e, t);
+                    } else {
+                        (this.#n.size === 0 && $e.delete(this),
+                            this.#s.clear(),
+                            this.#c.clear());
+                        for (let e of this.#e) e(this);
+                        (this.#e.clear(), ut(r), ut(n), this.#i?.resolve());
+                    }
+                    var o = M;
+                    if (this.#a.length > 0) {
+                        let e = (o ??= this);
+                        e.#a.push(...this.#a.filter((t) => !e.#a.includes(t)));
+                    }
+                    (o !== null && ($e.add(o), o.flush()),
+                        Pe && !$e.has(this) && this.#v());
+                }
+                #g(e, t, n) {
+                    e.f ^= h;
+                    for (var r = e.first; r !== null;) {
+                        var i = r.f,
+                            a = (i & 96) != 0;
+                        if (
+                            !((a && i & 1024) || i & 8192 || this.#l.has(r)) &&
+                            r.fn !== null
+                        ) {
+                            a
+                                ? (r.f ^= h)
+                                : i & 4
+                                    ? t.push(r)
+                                    : Pe && i & 16777224
+                                        ? n.push(r)
+                                        : Wn(r) && (i & 16 && this.#c.add(r), Yn(r));
+                            var o = r.first;
+                            if (o !== null) {
+                                r = o;
+                                continue;
+                            }
+                        }
+                        for (; r !== null;) {
+                            var s = r.next;
+                            if (s !== null) {
+                                r = s;
+                                break;
+                            }
+                            r = r.parent;
+                        }
+                    }
+                }
+                #_(e) {
+                    for (var t = 0; t < e.length; t += 1) Ye(e[t], this.#s, this.#c);
+                }
+                capture(e, t, n = !1) {
+                    (e.v !== T && !this.previous.has(e) && this.previous.set(e, e.v),
+                        e.f & 8388608 || (this.current.set(e, [t, n]), N?.set(e, t)),
+                        this.is_fork || (e.v = t));
+                }
+                activate() {
+                    M = this;
+                }
+                deactivate() {
+                    ((M = null), (N = null));
+                }
+                flush() {
+                    try {
+                        ((nt = !0), (M = this), this.#h());
+                    } finally {
+                        ((at = 0),
+                            (et = null),
+                            (rt = null),
+                            (it = null),
+                            (nt = !1),
+                            (M = null),
+                            (N = null),
+                            Pt.clear());
+                    }
+                }
+                discard() {
+                    for (let e of this.#t) e(this);
+                    (this.#t.clear(), $e.delete(this));
+                }
+                register_created_effect(e) {
+                    this.#o.push(e);
+                }
+                #v() {
+                    for (let l of $e) {
+                        var e = l.id < this.id,
+                            t = [];
+                        for (let [r, [i, a]] of this.current) {
+                            if (l.current.has(r)) {
+                                var n = l.current.get(r)[0];
+                                if (e && i !== n) l.current.set(r, [i, a]);
+                                else continue;
+                            }
+                            t.push(r);
+                        }
+                        var r = [...l.current.keys()].filter((e) => !this.current.has(e));
+                        if (r.length === 0) e && l.discard();
+                        else if (t.length > 0) {
+                            if (e)
+                                for (let e of this.#u)
+                                    l.unskip_effect(e, (e) => {
+                                        e.f & 4194320 ? l.schedule(e) : l.#_([e]);
+                                    });
+                            l.activate();
+                            var i = new Set(),
+                                a = new Map();
+                            for (var o of t) dt(o, r, i, a);
+                            a = new Map();
+                            var s = [...l.current.keys()].filter((e) =>
+                                this.current.has(e) ? this.current.get(e)[0] !== e : !0,
+                            );
+                            for (let e of this.#o)
+                                !(e.f & 155648) &&
+                                    ft(e, s, a) &&
+                                    (e.f & 4194320 ? (j(e, g), l.schedule(e)) : l.#s.add(e));
+                            if (l.#a.length > 0) {
+                                l.apply();
+                                for (var c of l.#a) l.#g(c, [], []);
+                                l.#a = [];
+                            }
+                            l.deactivate();
+                        }
+                    }
+                    for (let e of $e)
+                        e.#f.has(this) &&
+                            (e.#f.delete(this),
+                                e.#f.size === 0 && !e.#p() && (e.activate(), e.#h()));
+                }
+                increment(e, t) {
+                    let n = this.#n.get(t) ?? 0;
+                    if ((this.#n.set(t, n + 1), e)) {
+                        let e = this.#r.get(t) ?? 0;
+                        this.#r.set(t, e + 1);
+                    }
+                }
+                decrement(e, t, n) {
+                    let r = this.#n.get(t) ?? 0;
+                    if ((r === 1 ? this.#n.delete(t) : this.#n.set(t, r - 1), e)) {
+                        let e = this.#r.get(t) ?? 0;
+                        e === 1 ? this.#r.delete(t) : this.#r.set(t, e - 1);
+                    }
+                    this.#d ||
+                        n ||
+                        ((this.#d = !0),
+                            Ue(() => {
+                                ((this.#d = !1), this.flush());
+                            }));
+                }
+                transfer_effects(e, t) {
+                    for (let t of e) this.#s.add(t);
+                    for (let e of t) this.#c.add(e);
+                    (e.clear(), t.clear());
+                }
+                oncommit(e) {
+                    this.#e.add(e);
+                }
+                ondiscard(e) {
+                    this.#t.add(e);
+                }
+                settled() {
+                    return (this.#i ??= m()).promise;
+                }
+                static ensure() {
+                    if (M === null) {
+                        let t = (M = new e());
+                        nt ||
+                            ($e.add(M),
+                                tt ||
+                                Ue(() => {
+                                    M === t && t.flush();
+                                }));
+                    }
+                    return M;
+                }
+                apply() {
+                    if (!Pe || (!this.is_fork && $e.size === 1)) {
+                        N = null;
+                        return;
+                    }
+                    N = new Map();
+                    for (let [e, [t]] of this.current) N.set(e, t);
+                    for (let n of $e)
+                        if (!(n === this || n.is_fork)) {
+                            var e = !1,
+                                t = !1;
+                            if (n.id < this.id)
+                                for (let [r, [, i]] of n.current)
+                                    i ||
+                                        ((e ||= this.current.has(r)),
+                                            (t ||= !this.current.has(r)));
+                            if (e && t) this.#f.add(n);
+                            else for (let [e, t] of n.previous) N.has(e) || N.set(e, t);
+                        }
+                }
+                schedule(e) {
+                    if (
+                        ((et = e), e.b?.is_pending && e.f & 16777228 && !(e.f & 32768))
+                    ) {
+                        e.b.defer_effect(e);
+                        return;
+                    }
+                    for (var t = e; t.parent !== null;) {
+                        t = t.parent;
+                        var n = t.f;
+                        if (
+                            rt !== null &&
+                            t === H &&
+                            (Pe || ((B === null || !(B.f & 2)) && !Xe))
+                        )
+                            return;
+                        if (n & 96) {
+                            if (!(n & 1024)) return;
+                            t.f ^= h;
+                        }
+                    }
+                    this.#a.push(t);
+                }
+            };
+        function ct() {
+            try {
+                ge();
+            } catch (e) {
+                Ge(e, et);
+            }
+        }
+        var lt = null;
+        function ut(e) {
+            var t = e.length;
+            if (t !== 0) {
+                for (var n = 0; n < t;) {
+                    var r = e[n++];
+                    if (
+                        !(r.f & 24576) &&
+                        Wn(r) &&
+                        ((lt = new Set()),
+                            Yn(r),
+                            r.deps === null &&
+                            r.first === null &&
+                            r.nodes === null &&
+                            r.teardown === null &&
+                            r.ac === null &&
+                            En(r),
+                            lt?.size > 0)
+                    ) {
+                        Pt.clear();
+                        for (let e of lt) {
+                            if (e.f & 24576) continue;
+                            let t = [e],
+                                n = e.parent;
+                            for (; n !== null;)
+                                (lt.has(n) && (lt.delete(n), t.push(n)), (n = n.parent));
+                            for (let e = t.length - 1; e >= 0; e--) {
+                                let n = t[e];
+                                n.f & 24576 || Yn(n);
+                            }
+                        }
+                        lt.clear();
+                    }
+                }
+                lt = null;
+            }
+        }
+        function dt(e, t, n, r) {
+            if (!n.has(e) && (n.add(e), e.reactions !== null))
+                for (let i of e.reactions) {
+                    let e = i.f;
+                    e & 2
+                        ? dt(i, t, n, r)
+                        : e & 4194320 && !(e & 2048) && ft(i, t, r) && (j(i, g), pt(i));
+                }
+        }
+        function ft(e, t, r) {
+            let i = r.get(e);
+            if (i !== void 0) return i;
+            if (e.deps !== null)
+                for (let i of e.deps) {
+                    if (n.call(t, i)) return !0;
+                    if (i.f & 2 && ft(i, t, r)) return (r.set(i, !0), !0);
+                }
+            return (r.set(e, !1), !1);
+        }
+        function pt(e) {
+            M.schedule(e);
+        }
+        function mt(e, t) {
+            if (!(e.f & 32 && e.f & 1024)) {
+                (e.f & 2048 ? t.d.push(e) : e.f & 4096 && t.m.push(e), j(e, h));
+                for (var n = e.first; n !== null;) (mt(n, t), (n = n.next));
+            }
+        }
+        function ht(e) {
+            j(e, h);
+            for (var t = e.first; t !== null;) (ht(t), (t = t.next));
+        }
+        function gt(e) {
+            let t = 0,
+                n = It(0),
+                r;
+            return () => {
+                ln() &&
+                    (J(n),
+                        yn(
+                            () => (
+                                t === 0 && (r = Y(() => e(() => Ht(n)))),
+                                (t += 1),
+                                () => {
+                                    Ue(() => {
+                                        (--t, t === 0 && (r?.(), (r = void 0), Ht(n)));
+                                    });
+                                }
+                            ),
+                        ));
+            };
+        }
+        var _t = S | ee;
+        function vt(e, t, n, r) {
+            new yt(e, t, n, r);
+        }
+        var yt = class {
+            parent;
+            is_pending = !1;
+            transform_error;
+            #e;
+            #t = E ? D : null;
+            #n;
+            #r;
+            #i;
+            #a = null;
+            #o = null;
+            #s = null;
+            #c = null;
+            #l = 0;
+            #u = 0;
+            #d = !1;
+            #f = new Set();
+            #p = new Set();
+            #m = null;
+            #h = gt(
+                () => (
+                    (this.#m = It(this.#l)),
+                    () => {
+                        this.#m = null;
+                    }
+                ),
+            );
+            constructor(e, t, n, r) {
+                ((this.#e = e),
+                    (this.#n = t),
+                    (this.#r = (e) => {
+                        var t = H;
+                        ((t.b = this), (t.f |= 128), n(e));
+                    }),
+                    (this.parent = H.b),
+                    (this.transform_error =
+                        r ?? this.parent?.transform_error ?? ((e) => e)),
+                    (this.#i = xn(() => {
+                        if (E) {
+                            let e = this.#t;
+                            De();
+                            let t = e.data === `[!`;
+                            if (e.data.startsWith(`[?`)) {
+                                let t = JSON.parse(e.data.slice(2));
+                                this.#_(t);
+                            } else t ? this.#v() : this.#g();
+                        } else this.#y();
+                    }, _t)),
+                    E && (this.#e = D));
+            }
+            #g() {
+                try {
+                    this.#a = R(() => this.#r(this.#e));
+                } catch (e) {
+                    this.error(e);
+                }
+            }
+            #_(e) {
+                let t = this.#n.failed;
+                t &&
+                    (this.#s = R(() => {
+                        t(
+                            this.#e,
+                            () => e,
+                            () => () => { },
+                        );
+                    }));
+            }
+            #v() {
+                let e = this.#n.pending;
+                e &&
+                    ((this.is_pending = !0),
+                        (this.#o = R(() => e(this.#e))),
+                        Ue(() => {
+                            var e = (this.#c = document.createDocumentFragment()),
+                                t = Xt();
+                            (e.append(t),
+                                (this.#a = this.#x(() => R(() => this.#r(t)))),
+                                this.#u === 0 &&
+                                (this.#e.before(e),
+                                    (this.#c = null),
+                                    Dn(this.#o, () => {
+                                        this.#o = null;
+                                    }),
+                                    this.#b(M)));
+                        }));
+            }
+            #y() {
+                try {
+                    if (
+                        ((this.is_pending = this.has_pending_snippet()),
+                            (this.#u = 0),
+                            (this.#l = 0),
+                            (this.#a = R(() => {
+                                this.#r(this.#e);
+                            })),
+                            this.#u > 0)
+                    ) {
+                        var e = (this.#c = document.createDocumentFragment());
+                        jn(this.#a, e);
+                        let t = this.#n.pending;
+                        this.#o = R(() => t(this.#e));
+                    } else this.#b(M);
+                } catch (e) {
+                    this.error(e);
+                }
+            }
+            #b(e) {
+                ((this.is_pending = !1), e.transfer_effects(this.#f, this.#p));
+            }
+            defer_effect(e) {
+                Ye(e, this.#f, this.#p);
+            }
+            is_rendered() {
+                return (
+                    !this.is_pending && (!this.parent || this.parent.is_rendered())
+                );
+            }
+            has_pending_snippet() {
+                return !!this.#n.pending;
+            }
+            #x(e) {
+                var t = H,
+                    n = B,
+                    r = A;
+                (U(this.#i), V(this.#i), Le(this.#i.ctx));
+                try {
+                    return (st.ensure(), e());
+                } catch (e) {
+                    return (We(e), null);
+                } finally {
+                    (U(t), V(n), Le(r));
+                }
+            }
+            #S(e, t) {
+                if (!this.has_pending_snippet()) {
+                    this.parent && this.parent.#S(e, t);
+                    return;
+                }
+                ((this.#u += e),
+                    this.#u === 0 &&
+                    (this.#b(t),
+                        this.#o &&
+                        Dn(this.#o, () => {
+                            this.#o = null;
+                        }),
+                        (this.#c &&= (this.#e.before(this.#c), null))));
+            }
+            update_pending_count(e, t) {
+                (this.#S(e, t),
+                    (this.#l += e),
+                    !(!this.#m || this.#d) &&
+                    ((this.#d = !0),
+                        Ue(() => {
+                            ((this.#d = !1), this.#m && zt(this.#m, this.#l));
+                        })));
+            }
+            get_effect_pending() {
+                return (this.#h(), J(this.#m));
+            }
+            error(e) {
+                var t = this.#n.onerror;
+                let n = this.#n.failed;
+                if (!t && !n) throw e;
+                ((this.#a &&= (z(this.#a), null)),
+                    (this.#o &&= (z(this.#o), null)),
+                    (this.#s &&= (z(this.#s), null)),
+                    E && (O(this.#t), Oe(), O(ke())));
+                var r = !1,
+                    i = !1;
+                let a = () => {
+                    if (r) {
+                        Te();
+                        return;
+                    }
+                    ((r = !0),
+                        i && xe(),
+                        this.#s !== null &&
+                        Dn(this.#s, () => {
+                            this.#s = null;
+                        }),
+                        this.#x(() => {
+                            this.#y();
+                        }));
+                },
+                    o = (e) => {
+                        try {
+                            ((i = !0), t?.(e, a), (i = !1));
+                        } catch (e) {
+                            Ge(e, this.#i && this.#i.parent);
+                        }
+                        n &&
+                            (this.#s = this.#x(() => {
+                                try {
+                                    return R(() => {
+                                        var t = H;
+                                        ((t.b = this),
+                                            (t.f |= 128),
+                                            n(
+                                                this.#e,
+                                                () => e,
+                                                () => a,
+                                            ));
+                                    });
+                                } catch (e) {
+                                    return (Ge(e, this.#i.parent), null);
+                                }
+                            }));
+                    };
+                Ue(() => {
+                    var t;
+                    try {
+                        t = this.transform_error(e);
+                    } catch (e) {
+                        Ge(e, this.#i && this.#i.parent);
+                        return;
+                    }
+                    typeof t == `object` && t && typeof t.then == `function`
+                        ? t.then(o, (e) => Ge(e, this.#i && this.#i.parent))
+                        : o(t);
+                });
+            }
+        };
+        function bt(e, t, n, r) {
+            let i = Be() ? wt : Et;
+            var a = e.filter((e) => !e.settled);
+            if (n.length === 0 && a.length === 0) {
+                r(t.map(i));
+                return;
+            }
+            var o = H,
+                s = xt(),
+                c =
+                    a.length === 1
+                        ? a[0].promise
+                        : a.length > 1
+                            ? Promise.all(a.map((e) => e.promise))
+                            : null;
+            function l(e) {
+                s();
+                try {
+                    r(e);
+                } catch (e) {
+                    o.f & 16384 || Ge(e, o);
+                }
+                St();
+            }
+            if (n.length === 0) {
+                c.then(() => l(t.map(i)));
+                return;
+            }
+            var u = Ct();
+            function d() {
+                Promise.all(n.map((e) => Tt(e)))
+                    .then((e) => l([...t.map(i), ...e]))
+                    .catch((e) => Ge(e, o))
+                    .finally(() => u());
+            }
+            c
+                ? c.then(() => {
+                    (s(), d(), St());
+                })
+                : d();
+        }
+        function xt() {
+            var e = H,
+                t = B,
+                n = A,
+                r = M;
+            return function (i = !0) {
+                (U(e),
+                    V(t),
+                    Le(n),
+                    i && !(e.f & 16384) && (r?.activate(), r?.apply()));
+            };
+        }
+        function St(e = !0) {
+            (U(null), V(null), Le(null), e && M?.deactivate());
+        }
+        function Ct() {
+            var e = H,
+                t = e.b,
+                n = M,
+                r = t.is_rendered();
+            return (
+                t.update_pending_count(1, n),
+                n.increment(r, e),
+                (i = !1) => {
+                    (t.update_pending_count(-1, n), n.decrement(r, e, i));
+                }
+            );
+        }
+        function wt(e) {
+            var t = 2 | g,
+                n = B !== null && B.f & 2 ? B : null;
+            return (
+                H !== null && (H.f |= ee),
+                {
+                    ctx: A,
+                    deps: null,
+                    effects: null,
+                    equals: je,
+                    f: t,
+                    fn: e,
+                    reactions: null,
+                    rv: 0,
+                    v: T,
+                    wv: 0,
+                    parent: n ?? H,
+                    ac: null,
+                }
+            );
+        }
+        function Tt(e, t, n) {
+            let r = H;
+            r === null && de();
+            var i = void 0,
+                a = It(T),
+                o = !B,
+                s = new Map();
+            return (
+                vn(() => {
+                    var t = H,
+                        n = m();
+                    i = n.promise;
+                    try {
+                        Promise.resolve(e()).then(n.resolve, n.reject).finally(St);
+                    } catch (e) {
+                        (n.reject(e), St());
+                    }
+                    var c = M;
+                    if (o) {
+                        if (t.f & 32768) var l = Ct();
+                        if (r.b.is_rendered()) (s.get(c)?.reject(ce), s.delete(c));
+                        else {
+                            for (let e of s.values()) e.reject(ce);
+                            s.clear();
+                        }
+                        s.set(c, n);
+                    }
+                    let u = (e, n = void 0) => {
+                        if ((l && l(n === ce), !(n === ce || t.f & 16384))) {
+                            if ((c.activate(), n)) ((a.f |= ae), zt(a, n));
+                            else {
+                                (a.f & 8388608 && (a.f ^= ae), zt(a, e));
+                                for (let [e, t] of s) {
+                                    if ((s.delete(e), e === c)) break;
+                                    t.reject(ce);
+                                }
+                            }
+                            c.deactivate();
+                        }
+                    };
+                    n.promise.then(u, (e) => u(null, e || `unknown`));
+                }),
+                un(() => {
+                    for (let e of s.values()) e.reject(ce);
+                }),
+                new Promise((e) => {
+                    function t(n) {
+                        function r() {
+                            n === i ? e(a) : t(i);
+                        }
+                        n.then(r, r);
+                    }
+                    t(i);
+                })
+            );
+        }
+        function Et(e) {
+            let t = wt(e);
+            return ((t.equals = Ne), t);
+        }
+        function Dt(e) {
+            var t = e.effects;
+            if (t !== null) {
+                e.effects = null;
+                for (var n = 0; n < t.length; n += 1) z(t[n]);
+            }
+        }
+        function Ot(e) {
+            for (var t = e.parent; t !== null;) {
+                if (!(t.f & 2)) return t.f & 16384 ? null : t;
+                t = t.parent;
+            }
+            return null;
+        }
+        function kt(e) {
+            var t,
+                n = H;
+            U(Ot(e));
+            try {
+                ((e.f &= ~ne), Dt(e), (t = Kn(e)));
+            } finally {
+                U(n);
+            }
+            return t;
+        }
+        function At(e) {
+            var t = kt(e);
+            if (
+                !e.equals(t) &&
+                ((e.wv = Un()),
+                    (!M?.is_fork || e.deps === null) &&
+                    (M === null ? (e.v = t) : M.capture(e, t, !0), e.deps === null))
+            ) {
+                j(e, h);
+                return;
+            }
+            Pn || (N === null ? qe(e) : (ln() || M?.is_fork) && N.set(e, t));
+        }
+        function jt(e) {
+            if (e.effects !== null)
+                for (let t of e.effects)
+                    (t.teardown || t.ac) &&
+                        (t.teardown?.(),
+                            t.ac?.abort(ce),
+                            (t.teardown = d),
+                            (t.ac = null),
+                            Jn(t, 0),
+                            Cn(t));
+        }
+        function Mt(e) {
+            if (e.effects !== null) for (let t of e.effects) t.teardown && Yn(t);
+        }
+        var Nt = new Set(),
+            Pt = new Map(),
+            Ft = !1;
+        function It(e, t) {
+            return { f: 0, v: e, reactions: null, equals: je, rv: 0, wv: 0 };
+        }
+        function Lt(e, t) {
+            let n = It(e, t);
+            return (Ln(n), n);
+        }
+        function P(e, t = !1, n = !0) {
+            let r = It(e);
+            return (
+                t || (r.equals = Ne),
+                Fe && n && A !== null && A.l !== null && (A.l.s ??= []).push(r),
+                r
+            );
+        }
+        function Rt(e, t) {
+            return (
+                F(
+                    e,
+                    Y(() => J(e)),
+                ),
+                t
+            );
+        }
+        function F(e, t, r = !1) {
+            return (
+                B !== null &&
+                (!In || B.f & 131072) &&
+                Be() &&
+                B.f & 4325394 &&
+                (W === null || !n.call(W, e)) &&
+                be(),
+                zt(e, r ? Wt(t) : t, it)
+            );
+        }
+        function zt(e, t, n = null) {
+            if (!e.equals(t)) {
+                Pt.set(e, Pn ? t : e.v);
+                var r = st.ensure();
+                if ((r.capture(e, t), e.f & 2)) {
+                    let t = e;
+                    (e.f & 2048 && kt(t), N === null && qe(t));
+                }
+                ((e.wv = Un()),
+                    Ut(e, g, n),
+                    Be() &&
+                    H !== null &&
+                    H.f & 1024 &&
+                    !(H.f & 96) &&
+                    (q === null ? Rn([e]) : q.push(e)),
+                    !r.is_fork && Nt.size > 0 && !Ft && Bt());
+            }
+            return t;
+        }
+        function Bt() {
+            Ft = !1;
+            for (let e of Nt) (e.f & 1024 && j(e, _), Wn(e) && Yn(e));
+            Nt.clear();
+        }
+        function Vt(e, t = 1) {
+            var n = J(e),
+                r = t === 1 ? n++ : n--;
+            return (F(e, n), r);
+        }
+        function Ht(e) {
+            F(e, e.v + 1);
+        }
+        function Ut(e, t, n) {
+            var r = e.reactions;
+            if (r !== null)
+                for (var i = Be(), a = r.length, o = 0; o < a; o++) {
+                    var s = r[o],
+                        c = s.f;
+                    if (!(!i && s === H)) {
+                        var l = (c & g) === 0;
+                        if ((l && j(s, t), c & 2)) {
+                            var u = s;
+                            (N?.delete(u),
+                                c & 65536 || (c & 512 && (s.f |= ne), Ut(u, _, n)));
+                        } else if (l) {
+                            var d = s;
+                            (c & 16 && lt !== null && lt.add(d),
+                                n === null ? pt(d) : n.push(d));
+                        }
+                    }
+                }
+        }
+        function Wt(t) {
+            if (typeof t != `object` || !t || w in t) return t;
+            let n = l(t);
+            if (n !== s && n !== c) return t;
+            var r = new Map(),
+                i = e(t),
+                o = Lt(0),
+                u = null,
+                d = Vn,
+                f = (e) => {
+                    if (Vn === d) return e();
+                    var t = B,
+                        n = Vn;
+                    (V(null), Hn(d));
+                    var r = e();
+                    return (V(t), Hn(n), r);
+                };
+            return (
+                i && r.set(`length`, Lt(t.length, u)),
+                new Proxy(t, {
+                    defineProperty(e, t, n) {
+                        (!(`value` in n) ||
+                            n.configurable === !1 ||
+                            n.enumerable === !1 ||
+                            n.writable === !1) &&
+                            ve();
+                        var i = r.get(t);
+                        return (
+                            i === void 0
+                                ? f(() => {
+                                    var e = Lt(n.value, u);
+                                    return (r.set(t, e), e);
+                                })
+                                : F(i, n.value, !0),
+                            !0
+                        );
+                    },
+                    deleteProperty(e, t) {
+                        var n = r.get(t);
+                        if (n === void 0) {
+                            if (t in e) {
+                                let e = f(() => Lt(T, u));
+                                (r.set(t, e), Ht(o));
+                            }
+                        } else (F(n, T), Ht(o));
+                        return !0;
+                    },
+                    get(e, n, i) {
+                        if (n === w) return t;
+                        var o = r.get(n),
+                            s = n in e;
+                        if (
+                            (o === void 0 &&
+                                (!s || a(e, n)?.writable) &&
+                                ((o = f(() => Lt(Wt(s ? e[n] : T), u))), r.set(n, o)),
+                                o !== void 0)
+                        ) {
+                            var c = J(o);
+                            return c === T ? void 0 : c;
+                        }
+                        return Reflect.get(e, n, i);
+                    },
+                    getOwnPropertyDescriptor(e, t) {
+                        var n = Reflect.getOwnPropertyDescriptor(e, t);
+                        if (n && `value` in n) {
+                            var i = r.get(t);
+                            i && (n.value = J(i));
+                        } else if (n === void 0) {
+                            var a = r.get(t),
+                                o = a?.v;
+                            if (a !== void 0 && o !== T)
+                                return {
+                                    enumerable: !0,
+                                    configurable: !0,
+                                    value: o,
+                                    writable: !0,
+                                };
+                        }
+                        return n;
+                    },
+                    has(e, t) {
+                        if (t === w) return !0;
+                        var n = r.get(t),
+                            i = (n !== void 0 && n.v !== T) || Reflect.has(e, t);
+                        return (n !== void 0 ||
+                            (H !== null && (!i || a(e, t)?.writable))) &&
+                            (n === void 0 &&
+                                ((n = f(() => Lt(i ? Wt(e[t]) : T, u))), r.set(t, n)),
+                                J(n) === T)
+                            ? !1
+                            : i;
+                    },
+                    set(e, t, n, s) {
+                        var c = r.get(t),
+                            l = t in e;
+                        if (i && t === `length`)
+                            for (var d = n; d < c.v; d += 1) {
+                                var p = r.get(d + ``);
+                                p === void 0
+                                    ? d in e && ((p = f(() => Lt(T, u))), r.set(d + ``, p))
+                                    : F(p, T);
+                            }
+                        if (c === void 0)
+                            (!l || a(e, t)?.writable) &&
+                                ((c = f(() => Lt(void 0, u))), F(c, Wt(n)), r.set(t, c));
+                        else {
+                            l = c.v !== T;
+                            var m = f(() => Wt(n));
+                            F(c, m);
+                        }
+                        var h = Reflect.getOwnPropertyDescriptor(e, t);
+                        if ((h?.set && h.set.call(s, n), !l)) {
+                            if (i && typeof t == `string`) {
+                                var g = r.get(`length`),
+                                    _ = Number(t);
+                                Number.isInteger(_) && _ >= g.v && F(g, _ + 1);
+                            }
+                            Ht(o);
+                        }
+                        return !0;
+                    },
+                    ownKeys(e) {
+                        J(o);
+                        var t = Reflect.ownKeys(e).filter((e) => {
+                            var t = r.get(e);
+                            return t === void 0 || t.v !== T;
+                        });
+                        for (var [n, i] of r) i.v !== T && !(n in e) && t.push(n);
+                        return t;
+                    },
+                    setPrototypeOf() {
+                        ye();
+                    },
+                })
+            );
+        }
+        var Gt, Kt, qt, Jt;
+        function Yt() {
+            if (Gt === void 0) {
+                ((Gt = window), (Kt = /Firefox/.test(navigator.userAgent)));
+                var e = Element.prototype,
+                    t = Node.prototype,
+                    n = Text.prototype;
+                ((qt = a(t, `firstChild`).get),
+                    (Jt = a(t, `nextSibling`).get),
+                    u(e) &&
+                    ((e.__click = void 0),
+                        (e.__className = void 0),
+                        (e.__attributes = null),
+                        (e.__style = void 0),
+                        (e.__e = void 0)),
+                    u(n) && (n.__t = void 0));
+            }
+        }
+        function Xt(e = ``) {
+            return document.createTextNode(e);
+        }
+        function Zt(e) {
+            return qt.call(e);
+        }
+        function Qt(e) {
+            return Jt.call(e);
+        }
+        function I(e, t) {
+            if (!E) return Zt(e);
+            var n = Zt(D);
+            if (n === null) n = D.appendChild(Xt());
+            else if (t && n.nodeType !== 3) {
+                var r = Xt();
+                return (n?.before(r), O(r), r);
+            }
+            return (t && rn(n), O(n), n);
+        }
+        function $t(e, t = !1) {
+            if (!E) {
+                var n = Zt(e);
+                return n instanceof Comment && n.data === `` ? Qt(n) : n;
+            }
+            if (t) {
+                if (D?.nodeType !== 3) {
+                    var r = Xt();
+                    return (D?.before(r), O(r), r);
+                }
+                rn(D);
+            }
+            return D;
+        }
+        function L(e, t = 1, n = !1) {
+            let r = E ? D : e;
+            for (var i; t--;) ((i = r), (r = Qt(r)));
+            if (!E) return r;
+            if (n) {
+                if (r?.nodeType !== 3) {
+                    var a = Xt();
+                    return (r === null ? i?.after(a) : r.before(a), O(a), a);
+                }
+                rn(r);
+            }
+            return (O(r), r);
+        }
+        function en(e) {
+            e.textContent = ``;
+        }
+        function tn() {
+            return !Pe || lt !== null ? !1 : (H.f & b) !== 0;
+        }
+        function nn(e, t, n) {
+            let r = n ? { is: n } : void 0;
+            return document.createElementNS(
+                t ?? `http://www.w3.org/1999/xhtml`,
+                e,
+                r,
+            );
+        }
+        function rn(e) {
+            if (e.nodeValue.length < 65536) return;
+            let t = e.nextSibling;
+            for (; t !== null && t.nodeType === 3;)
+                (t.remove(), (e.nodeValue += t.nodeValue), (t = e.nextSibling));
+        }
+        function an(e) {
+            var t = B,
+                n = H;
+            (V(null), U(null));
+            try {
+                return e();
+            } finally {
+                (V(t), U(n));
+            }
+        }
+        function on(e) {
+            (H === null && (B === null && he(e), me()), Pn && pe(e));
+        }
+        function sn(e, t) {
+            var n = t.last;
+            n === null
+                ? (t.last = t.first = e)
+                : ((n.next = e), (e.prev = n), (t.last = e));
+        }
+        function cn(e, t) {
+            var n = H;
+            n !== null && n.f & 8192 && (e |= v);
+            var r = {
+                ctx: A,
+                deps: null,
+                nodes: null,
+                f: e | g | 512,
+                first: null,
+                fn: t,
+                last: null,
+                next: null,
+                parent: n,
+                b: n && n.b,
+                prev: null,
+                teardown: null,
+                wv: 0,
+                ac: null,
+            };
+            M?.register_created_effect(r);
+            var i = r;
+            if (e & 4) rt === null ? st.ensure().schedule(r) : rt.push(r);
+            else if (t !== null) {
+                try {
+                    Yn(r);
+                } catch (e) {
+                    throw (z(r), e);
+                }
+                i.deps === null &&
+                    i.teardown === null &&
+                    i.nodes === null &&
+                    i.first === i.last &&
+                    !(i.f & 524288) &&
+                    ((i = i.first), e & 16 && e & 65536 && i !== null && (i.f |= S));
+            }
+            if (
+                i !== null &&
+                ((i.parent = n),
+                    n !== null && sn(i, n),
+                    B !== null && B.f & 2 && !(e & 64))
+            ) {
+                var a = B;
+                (a.effects ??= []).push(i);
+            }
+            return r;
+        }
+        function ln() {
+            return B !== null && !In;
+        }
+        function un(e) {
+            let t = cn(8, null);
+            return (j(t, h), (t.teardown = e), t);
+        }
+        function dn(e) {
+            on(`$effect`);
+            var t = H.f;
+            if (!B && t & 32 && !(t & 32768)) {
+                var n = A;
+                (n.e ??= []).push(e);
+            } else return fn(e);
+        }
+        function fn(e) {
+            return cn(4 | C, e);
+        }
+        function pn(e) {
+            return (on(`$effect.pre`), cn(8 | C, e));
+        }
+        function mn(e) {
+            st.ensure();
+            let t = cn(64 | ee, e);
+            return (e = {}) =>
+                new Promise((n) => {
+                    e.outro
+                        ? Dn(t, () => {
+                            (z(t), n(void 0));
+                        })
+                        : (z(t), n(void 0));
+                });
+        }
+        function hn(e) {
+            return cn(4, e);
+        }
+        function gn(e, t) {
+            var n = A,
+                r = { effect: null, ran: !1, deps: e };
+            (n.l.$.push(r),
+                (r.effect = yn(() => {
+                    if ((e(), !r.ran)) {
+                        r.ran = !0;
+                        var n = H;
+                        try {
+                            (U(n.parent), Y(t));
+                        } finally {
+                            U(n);
+                        }
+                    }
+                })));
+        }
+        function _n() {
+            var e = A;
+            yn(() => {
+                for (var t of e.l.$) {
+                    t.deps();
+                    var n = t.effect;
+                    (n.f & 1024 && n.deps !== null && j(n, _),
+                        Wn(n) && Yn(n),
+                        (t.ran = !1));
+                }
+            });
+        }
+        function vn(e) {
+            return cn(ie | ee, e);
+        }
+        function yn(e, t = 0) {
+            return cn(8 | t, e);
+        }
+        function bn(e, t = [], n = [], r = []) {
+            bt(r, t, n, (t) => {
+                cn(8, () => e(...t.map(J)));
+            });
+        }
+        function xn(e, t = 0) {
+            return cn(16 | t, e);
+        }
+        function R(e) {
+            return cn(32 | ee, e);
+        }
+        function Sn(e) {
+            var t = e.teardown;
+            if (t !== null) {
+                let e = Pn,
+                    n = B;
+                (Fn(!0), V(null));
+                try {
+                    t.call(null);
+                } finally {
+                    (Fn(e), V(n));
+                }
+            }
+        }
+        function Cn(e, t = !1) {
+            var n = e.first;
+            for (e.first = e.last = null; n !== null;) {
+                let e = n.ac;
+                e !== null &&
+                    an(() => {
+                        e.abort(ce);
+                    });
+                var r = n.next;
+                (n.f & 64 ? (n.parent = null) : z(n, t), (n = r));
+            }
+        }
+        function wn(e) {
+            for (var t = e.first; t !== null;) {
+                var n = t.next;
+                (t.f & 32 || z(t), (t = n));
+            }
+        }
+        function z(e, t = !0) {
+            var n = !1;
+            ((t || e.f & 262144) &&
+                e.nodes !== null &&
+                e.nodes.end !== null &&
+                (Tn(e.nodes.start, e.nodes.end), (n = !0)),
+                j(e, x),
+                Cn(e, t && !n),
+                Jn(e, 0));
+            var r = e.nodes && e.nodes.t;
+            if (r !== null) for (let e of r) e.stop();
+            (Sn(e), (e.f ^= x), (e.f |= y));
+            var i = e.parent;
+            (i !== null && i.first !== null && En(e),
+                (e.next =
+                    e.prev =
+                    e.teardown =
+                    e.ctx =
+                    e.deps =
+                    e.fn =
+                    e.nodes =
+                    e.ac =
+                    e.b =
+                    null));
+        }
+        function Tn(e, t) {
+            for (; e !== null;) {
+                var n = e === t ? null : Qt(e);
+                (e.remove(), (e = n));
+            }
+        }
+        function En(e) {
+            var t = e.parent,
+                n = e.prev,
+                r = e.next;
+            (n !== null && (n.next = r),
+                r !== null && (r.prev = n),
+                t !== null &&
+                (t.first === e && (t.first = r), t.last === e && (t.last = n)));
+        }
+        function Dn(e, t, n = !0) {
+            var r = [];
+            On(e, r, !0);
+            var i = () => {
+                (n && z(e), t && t());
+            },
+                a = r.length;
+            if (a > 0) {
+                var o = () => --a || i();
+                for (var s of r) s.out(o);
+            } else i();
+        }
+        function On(e, t, n) {
+            if (!(e.f & 8192)) {
+                e.f ^= v;
+                var r = e.nodes && e.nodes.t;
+                if (r !== null) for (let e of r) (e.is_global || n) && t.push(e);
+                for (var i = e.first; i !== null;) {
+                    var a = i.next,
+                        o = (i.f & 65536) != 0 || ((i.f & 32) != 0 && (e.f & 16) != 0);
+                    (On(i, t, o ? n : !1), (i = a));
+                }
+            }
+        }
+        function kn(e) {
+            An(e, !0);
+        }
+        function An(e, t) {
+            if (e.f & 8192) {
+                ((e.f ^= v), e.f & 1024 || (j(e, g), st.ensure().schedule(e)));
+                for (var n = e.first; n !== null;) {
+                    var r = n.next,
+                        i = (n.f & 65536) != 0 || (n.f & 32) != 0;
+                    (An(n, i ? t : !1), (n = r));
+                }
+                var a = e.nodes && e.nodes.t;
+                if (a !== null) for (let e of a) (e.is_global || t) && e.in();
+            }
+        }
+        function jn(e, t) {
+            if (e.nodes)
+                for (var n = e.nodes.start, r = e.nodes.end; n !== null;) {
+                    var i = n === r ? null : Qt(n);
+                    (t.append(n), (n = i));
+                }
+        }
+        var Mn = null,
+            Nn = !1,
+            Pn = !1;
+        function Fn(e) {
+            Pn = e;
+        }
+        var B = null,
+            In = !1;
+        function V(e) {
+            B = e;
+        }
+        var H = null;
+        function U(e) {
+            H = e;
+        }
+        var W = null;
+        function Ln(e) {
+            B !== null && (!Pe || B.f & 2) && (W === null ? (W = [e]) : W.push(e));
+        }
+        var G = null,
+            K = 0,
+            q = null;
+        function Rn(e) {
+            q = e;
+        }
+        var zn = 1,
+            Bn = 0,
+            Vn = Bn;
+        function Hn(e) {
+            Vn = e;
+        }
+        function Un() {
+            return ++zn;
+        }
+        function Wn(e) {
+            var t = e.f;
+            if (t & 2048) return !0;
+            if ((t & 2 && (e.f &= ~ne), t & 4096)) {
+                for (var n = e.deps, r = n.length, i = 0; i < r; i++) {
+                    var a = n[i];
+                    if ((Wn(a) && At(a), a.wv > e.wv)) return !0;
+                }
+                t & 512 && N === null && j(e, h);
+            }
+            return !1;
+        }
+        function Gn(e, t, r = !0) {
+            var i = e.reactions;
+            if (i !== null && !(!Pe && W !== null && n.call(W, e)))
+                for (var a = 0; a < i.length; a++) {
+                    var o = i[a];
+                    o.f & 2
+                        ? Gn(o, t, !1)
+                        : t === o && (r ? j(o, g) : o.f & 1024 && j(o, _), pt(o));
+                }
+        }
+        function Kn(e) {
+            var t = G,
+                n = K,
+                r = q,
+                i = B,
+                a = W,
+                o = A,
+                s = In,
+                c = Vn,
+                l = e.f;
+            ((G = null),
+                (K = 0),
+                (q = null),
+                (B = l & 96 ? null : e),
+                (W = null),
+                Le(e.ctx),
+                (In = !1),
+                (Vn = ++Bn),
+                e.ac !== null &&
+                (an(() => {
+                    e.ac.abort(ce);
+                }),
+                    (e.ac = null)));
+            try {
+                e.f |= re;
+                var u = e.fn,
+                    d = u();
+                e.f |= b;
+                var f = e.deps,
+                    p = M?.is_fork;
+                if (G !== null) {
+                    var m;
+                    if ((p || Jn(e, K), f !== null && K > 0))
+                        for (f.length = K + G.length, m = 0; m < G.length; m++)
+                            f[K + m] = G[m];
+                    else e.deps = f = G;
+                    if (ln() && e.f & 512)
+                        for (m = K; m < f.length; m++) (f[m].reactions ??= []).push(e);
+                } else !p && f !== null && K < f.length && (Jn(e, K), (f.length = K));
+                if (Be() && q !== null && !In && f !== null && !(e.f & 6146))
+                    for (m = 0; m < q.length; m++) Gn(q[m], e);
+                if (i !== null && i !== e) {
+                    if ((Bn++, i.deps !== null))
+                        for (let e = 0; e < n; e += 1) i.deps[e].rv = Bn;
+                    if (t !== null) for (let e of t) e.rv = Bn;
+                    q !== null && (r === null ? (r = q) : r.push(...q));
+                }
+                return (e.f & 8388608 && (e.f ^= ae), d);
+            } catch (e) {
+                return We(e);
+            } finally {
+                ((e.f ^= re),
+                    (G = t),
+                    (K = n),
+                    (q = r),
+                    (B = i),
+                    (W = a),
+                    Le(o),
+                    (In = s),
+                    (Vn = c));
+            }
+        }
+        function qn(e, r) {
+            let i = r.reactions;
+            if (i !== null) {
+                var a = t.call(i, e);
+                if (a !== -1) {
+                    var o = i.length - 1;
+                    o === 0 ? (i = r.reactions = null) : ((i[a] = i[o]), i.pop());
+                }
+            }
+            if (i === null && r.f & 2 && (G === null || !n.call(G, r))) {
+                var s = r;
+                (s.f & 512 && ((s.f ^= 512), (s.f &= ~ne)),
+                    s.v !== T && qe(s),
+                    jt(s),
+                    Jn(s, 0));
+            }
+        }
+        function Jn(e, t) {
+            var n = e.deps;
+            if (n !== null) for (var r = t; r < n.length; r++) qn(e, n[r]);
+        }
+        function Yn(e) {
+            var t = e.f;
+            if (!(t & 16384)) {
+                j(e, h);
+                var n = H,
+                    r = Nn;
+                ((H = e), (Nn = !0));
+                try {
+                    (t & 16777232 ? wn(e) : Cn(e), Sn(e));
+                    var i = Kn(e);
+                    ((e.teardown = typeof i == `function` ? i : null), (e.wv = zn));
+                } finally {
+                    ((Nn = r), (H = n));
+                }
+            }
+        }
+        function J(e) {
+            var t = (e.f & 2) != 0;
+            if (
+                (Mn?.add(e),
+                    B !== null &&
+                    !In &&
+                    !(H !== null && H.f & 16384) &&
+                    (W === null || !n.call(W, e)))
+            ) {
+                var r = B.deps;
+                if (B.f & 2097152)
+                    e.rv < Bn &&
+                        ((e.rv = Bn),
+                            G === null && r !== null && r[K] === e
+                                ? K++
+                                : G === null
+                                    ? (G = [e])
+                                    : G.push(e));
+                else {
+                    (B.deps ??= []).push(e);
+                    var i = e.reactions;
+                    i === null ? (e.reactions = [B]) : n.call(i, B) || i.push(B);
+                }
+            }
+            if (Pn && Pt.has(e)) return Pt.get(e);
+            if (t) {
+                var a = e;
+                if (Pn) {
+                    var o = a.v;
+                    return (
+                        ((!(a.f & 1024) && a.reactions !== null) || Zn(a)) && (o = kt(a)),
+                        Pt.set(a, o),
+                        o
+                    );
+                }
+                var s =
+                    (a.f & 512) == 0 && !In && B !== null && (Nn || (B.f & 512) != 0),
+                    c = (a.f & b) === 0;
+                (Wn(a) && (s && (a.f |= 512), At(a)), s && !c && (Mt(a), Xn(a)));
+            }
+            if (N?.has(e)) return N.get(e);
+            if (e.f & 8388608) throw e.v;
+            return e.v;
+        }
+        function Xn(e) {
+            if (((e.f |= 512), e.deps !== null))
+                for (let t of e.deps)
+                    ((t.reactions ??= []).push(e),
+                        t.f & 2 && !(t.f & 512) && (Mt(t), Xn(t)));
+        }
+        function Zn(e) {
+            if (e.v === T) return !0;
+            if (e.deps === null) return !1;
+            for (let t of e.deps) if (Pt.has(t) || (t.f & 2 && Zn(t))) return !0;
+            return !1;
+        }
+        function Y(e) {
+            var t = In;
+            try {
+                return ((In = !0), e());
+            } finally {
+                In = t;
+            }
+        }
+        function X(e) {
+            if (!(typeof e != `object` || !e || e instanceof EventTarget)) {
+                if (w in e) Qn(e);
+                else if (!Array.isArray(e))
+                    for (let t in e) {
+                        let n = e[t];
+                        typeof n == `object` && n && w in n && Qn(n);
+                    }
+            }
+        }
+        function Qn(e, t = new Set()) {
+            if (
+                typeof e == `object` &&
+                e &&
+                !(e instanceof EventTarget) &&
+                !t.has(e)
+            ) {
+                (t.add(e), e instanceof Date && e.getTime());
+                for (let n in e)
+                    try {
+                        Qn(e[n], t);
+                    } catch { }
+                let n = l(e);
+                if (
+                    n !== Object.prototype &&
+                    n !== Array.prototype &&
+                    n !== Map.prototype &&
+                    n !== Set.prototype &&
+                    n !== Date.prototype
+                ) {
+                    let t = o(n);
+                    for (let n in t) {
+                        let r = t[n].get;
+                        if (r)
+                            try {
+                                r.call(e);
+                            } catch { }
+                    }
+                }
+            }
+        }
+        [
+            ...`allowfullscreen.async.autofocus.autoplay.checked.controls.default.disabled.formnovalidate.indeterminate.inert.ismap.loop.multiple.muted.nomodule.novalidate.open.playsinline.readonly.required.reversed.seamless.selected.webkitdirectory.defer.disablepictureinpicture.disableremoteplayback`.split(
+                `.`,
+            ),
+        ];
+        var $n = [`touchstart`, `touchmove`];
+        function er(e) {
+            return $n.includes(e);
+        }
+        var tr = Symbol(`events`),
+            nr = new Set(),
+            rr = new Set();
+        function ir(e, t, n, r = {}) {
+            function i(e) {
+                if ((r.capture || sr.call(t, e), !e.cancelBubble))
+                    return an(() => n?.call(this, e));
+            }
+            return (
+                e.startsWith(`pointer`) || e.startsWith(`touch`) || e === `wheel`
+                    ? Ue(() => {
+                        t.addEventListener(e, i, r);
+                    })
+                    : t.addEventListener(e, i, r),
+                i
+            );
+        }
+        function ar(e, t, n, r, i) {
+            var a = { capture: r, passive: i },
+                o = ir(e, t, n, a);
+            (t === document.body ||
+                t === window ||
+                t === document ||
+                t instanceof HTMLMediaElement) &&
+                un(() => {
+                    t.removeEventListener(e, o, a);
+                });
+        }
+        var or = null;
+        function sr(e) {
+            var t = this,
+                n = t.ownerDocument,
+                r = e.type,
+                a = e.composedPath?.() || [],
+                o = a[0] || e.target;
+            or = e;
+            var s = 0,
+                c = or === e && e[tr];
+            if (c) {
+                var l = a.indexOf(c);
+                if (l !== -1 && (t === document || t === window)) {
+                    e[tr] = t;
+                    return;
+                }
+                var u = a.indexOf(t);
+                if (u === -1) return;
+                l <= u && (s = l);
+            }
+            if (((o = a[s] || e.target), o !== t)) {
+                i(e, `currentTarget`, {
+                    configurable: !0,
+                    get() {
+                        return o || n;
+                    },
+                });
+                var d = B,
+                    f = H;
+                (V(null), U(null));
+                try {
+                    for (var p, m = []; o !== null;) {
+                        var h = o.assignedSlot || o.parentNode || o.host || null;
+                        try {
+                            var g = o[tr]?.[r];
+                            g != null && (!o.disabled || e.target === o) && g.call(o, e);
+                        } catch (e) {
+                            p ? m.push(e) : (p = e);
+                        }
+                        if (e.cancelBubble || h === t || h === null) break;
+                        o = h;
+                    }
+                    if (p) {
+                        for (let e of m)
+                            queueMicrotask(() => {
+                                throw e;
+                            });
+                        throw p;
+                    }
+                } finally {
+                    ((e[tr] = t), delete e.currentTarget, V(d), U(f));
+                }
+            }
+        }
+        var cr =
+            globalThis?.window?.trustedTypes &&
+            globalThis.window.trustedTypes.createPolicy(`svelte-trusted-html`, {
+                createHTML: (e) => e,
+            });
+        function lr(e) {
+            return cr?.createHTML(e) ?? e;
+        }
+        function ur(e) {
+            var t = nn(`template`);
+            return ((t.innerHTML = lr(e.replaceAll(`<!>`, `<!---->`))), t.content);
+        }
+        function dr(e, t) {
+            var n = H;
+            n.nodes === null && (n.nodes = { start: e, end: t, a: null, t: null });
+        }
+        function Z(e, t) {
+            var n = (t & 1) != 0,
+                r = (t & 2) != 0,
+                i,
+                a = !e.startsWith(`<!>`);
+            return () => {
+                if (E) return (dr(D, null), D);
+                i === void 0 && ((i = ur(a ? e : `<!>` + e)), n || (i = Zt(i)));
+                var t = r || Kt ? document.importNode(i, !0) : i.cloneNode(!0);
+                if (n) {
+                    var o = Zt(t),
+                        s = t.lastChild;
+                    dr(o, s);
+                } else dr(t, t);
+                return t;
+            };
+        }
+        function fr(e, t, n = `svg`) {
+            var r = !e.startsWith(`<!>`),
+                i = (t & 1) != 0,
+                a = `<${n}>${r ? e : `<!>` + e}</${n}>`,
+                o;
+            return () => {
+                if (E) return (dr(D, null), D);
+                if (!o) {
+                    var e = Zt(ur(a));
+                    if (i)
+                        for (o = document.createDocumentFragment(); Zt(e);)
+                            o.appendChild(Zt(e));
+                    else o = Zt(e);
+                }
+                var t = o.cloneNode(!0);
+                if (i) {
+                    var n = Zt(t),
+                        r = t.lastChild;
+                    dr(n, r);
+                } else dr(t, t);
+                return t;
+            };
+        }
+        function pr(e, t) {
+            return fr(e, t, `svg`);
+        }
+        function Q(e, t) {
+            if (E) {
+                var n = H;
+                ((!(n.f & 32768) || n.nodes.end === null) && (n.nodes.end = D), De());
+                return;
+            }
+            e !== null && e.before(t);
+        }
+        function mr(e, t) {
+            var n = t == null ? `` : typeof t == `object` ? `${t}` : t;
+            n !== (e.__t ??= e.nodeValue) && ((e.__t = n), (e.nodeValue = `${n}`));
+        }
+        function hr(e, t) {
+            return _r(e, t);
+        }
+        var gr = new Map();
+        function _r(
+            e,
+            {
+                target: t,
+                anchor: n,
+                props: i = {},
+                events: a,
+                context: o,
+                intro: s = !0,
+                transformError: c,
+            },
+        ) {
+            Yt();
+            var l = void 0,
+                u = mn(() => {
+                    var s = n ?? t.appendChild(Xt());
+                    vt(
+                        s,
+                        { pending: () => { } },
+                        (t) => {
+                            Re({});
+                            var n = A;
+                            if (
+                                (o && (n.c = o),
+                                    a && (i.$$events = a),
+                                    E && dr(t, null),
+                                    (l = e(t, i) || {}),
+                                    E &&
+                                    ((H.nodes.end = D),
+                                        D === null || D.nodeType !== 8 || D.data !== `]`))
+                            )
+                                throw (we(), Se);
+                            ze();
+                        },
+                        c,
+                    );
+                    var u = new Set(),
+                        d = (e) => {
+                            for (var n = 0; n < e.length; n++) {
+                                var r = e[n];
+                                if (!u.has(r)) {
+                                    u.add(r);
+                                    var i = er(r);
+                                    for (let e of [t, document]) {
+                                        var a = gr.get(e);
+                                        a === void 0 && ((a = new Map()), gr.set(e, a));
+                                        var o = a.get(r);
+                                        o === void 0
+                                            ? (e.addEventListener(r, sr, { passive: i }),
+                                                a.set(r, 1))
+                                            : a.set(r, o + 1);
+                                    }
+                                }
+                            }
+                        };
+                    return (
+                        d(r(nr)),
+                        rr.add(d),
+                        () => {
+                            for (var e of u)
+                                for (let n of [t, document]) {
+                                    var r = gr.get(n),
+                                        i = r.get(e);
+                                    --i == 0
+                                        ? (n.removeEventListener(e, sr),
+                                            r.delete(e),
+                                            r.size === 0 && gr.delete(n))
+                                        : r.set(e, i);
+                                }
+                            (rr.delete(d), s !== n && s.parentNode?.removeChild(s));
+                        }
+                    );
+                });
+            return (vr.set(l, u), l);
+        }
+        var vr = new WeakMap(),
+            yr = class {
+                anchor;
+                #e = new Map();
+                #t = new Map();
+                #n = new Map();
+                #r = new Set();
+                #i = !0;
+                constructor(e, t = !0) {
+                    ((this.anchor = e), (this.#i = t));
+                }
+                #a = (e) => {
+                    if (this.#e.has(e)) {
+                        var t = this.#e.get(e),
+                            n = this.#t.get(t);
+                        if (n) (kn(n), this.#r.delete(t));
+                        else {
+                            var r = this.#n.get(t);
+                            r &&
+                                (this.#t.set(t, r.effect),
+                                    this.#n.delete(t),
+                                    r.fragment.lastChild.remove(),
+                                    this.anchor.before(r.fragment),
+                                    (n = r.effect));
+                        }
+                        for (let [t, n] of this.#e) {
+                            if ((this.#e.delete(t), t === e)) break;
+                            let r = this.#n.get(n);
+                            r && (z(r.effect), this.#n.delete(n));
+                        }
+                        for (let [e, r] of this.#t) {
+                            if (e === t || this.#r.has(e)) continue;
+                            let i = () => {
+                                if (Array.from(this.#e.values()).includes(e)) {
+                                    var t = document.createDocumentFragment();
+                                    (jn(r, t),
+                                        t.append(Xt()),
+                                        this.#n.set(e, { effect: r, fragment: t }));
+                                } else z(r);
+                                (this.#r.delete(e), this.#t.delete(e));
+                            };
+                            this.#i || !n ? (this.#r.add(e), Dn(r, i, !1)) : i();
+                        }
+                    }
+                };
+                #o = (e) => {
+                    this.#e.delete(e);
+                    let t = Array.from(this.#e.values());
+                    for (let [e, n] of this.#n)
+                        t.includes(e) || (z(n.effect), this.#n.delete(e));
+                };
+                ensure(e, t) {
+                    var n = M,
+                        r = tn();
+                    if (t && !this.#t.has(e) && !this.#n.has(e))
+                        if (r) {
+                            var i = document.createDocumentFragment(),
+                                a = Xt();
+                            (i.append(a),
+                                this.#n.set(e, { effect: R(() => t(a)), fragment: i }));
+                        } else
+                            this.#t.set(
+                                e,
+                                R(() => t(this.anchor)),
+                            );
+                    if ((this.#e.set(n, e), r)) {
+                        for (let [t, r] of this.#t)
+                            t === e ? n.unskip_effect(r) : n.skip_effect(r);
+                        for (let [t, r] of this.#n)
+                            t === e ? n.unskip_effect(r.effect) : n.skip_effect(r.effect);
+                        (n.oncommit(this.#a), n.ondiscard(this.#o));
+                    } else (E && (this.anchor = D), this.#a(n));
+                }
+            };
+        function br(e, t, n = !1) {
+            var r;
+            E && ((r = D), De());
+            var i = new yr(e),
+                a = n ? S : 0;
+            function o(e, t) {
+                if (E) {
+                    var n = Ae(r);
+                    if (e !== parseInt(n.substring(1))) {
+                        var a = ke();
+                        (O(a), (i.anchor = a), Ee(!1), i.ensure(e, t), Ee(!0));
+                        return;
+                    }
+                }
+                i.ensure(e, t);
+            }
+            xn(() => {
+                var e = !1;
+                (t((t, n = 0) => {
+                    ((e = !0), o(n, t));
+                }),
+                    e || o(-1, null));
+            }, a);
+        }
+        function xr(e, t) {
+            return t;
+        }
+        function Sr(e, t, n) {
+            for (var i = [], a = t.length, o, s = t.length, c = 0; c < a; c++) {
+                let n = t[c];
+                Dn(
+                    n,
+                    () => {
+                        if (o) {
+                            if (
+                                (o.pending.delete(n), o.done.add(n), o.pending.size === 0)
+                            ) {
+                                var t = e.outrogroups;
+                                (Cr(e, r(o.done)),
+                                    t.delete(o),
+                                    t.size === 0 && (e.outrogroups = null));
+                            }
+                        } else --s;
+                    },
+                    !1,
+                );
+            }
+            if (s === 0) {
+                var l = i.length === 0 && n !== null;
+                if (l) {
+                    var u = n,
+                        d = u.parentNode;
+                    (en(d), d.append(u), e.items.clear());
+                }
+                Cr(e, t, !l);
+            } else
+                ((o = { pending: new Set(t), done: new Set() }),
+                    (e.outrogroups ??= new Set()).add(o));
+        }
+        function Cr(e, t, n = !0) {
+            var r;
+            if (e.pending.size > 0) {
+                r = new Set();
+                for (let t of e.pending.values())
+                    for (let n of t) r.add(e.items.get(n).e);
+            }
+            for (var i = 0; i < t.length; i++) {
+                var a = t[i];
+                r?.has(a)
+                    ? ((a.f |= te), jn(a, document.createDocumentFragment()))
+                    : z(t[i], n);
+            }
+        }
+        var wr;
+        function Tr(t, n, i, a, o, s = null) {
+            var c = t,
+                l = new Map();
+            if (n & 4) {
+                var u = t;
+                c = E ? O(Zt(u)) : u.appendChild(Xt());
+            }
+            E && De();
+            var d = null,
+                f = Et(() => {
+                    var t = i();
+                    return e(t) ? t : t == null ? [] : r(t);
+                }),
+                p,
+                m = new Map(),
+                h = !0;
+            function g(e) {
+                v.effect.f & 16384 ||
+                    (v.pending.delete(e),
+                        (v.fallback = d),
+                        Dr(v, p, c, n, a),
+                        d !== null &&
+                        (p.length === 0
+                            ? d.f & 33554432
+                                ? ((d.f ^= te), kr(d, null, c))
+                                : kn(d)
+                            : Dn(d, () => {
+                                d = null;
+                            })));
+            }
+            function _(e) {
+                v.pending.delete(e);
+            }
+            var v = {
+                effect: xn(() => {
+                    p = J(f);
+                    var e = p.length;
+                    let t = !1;
+                    E &&
+                        (Ae(c) === `[!`) != (e === 0) &&
+                        ((c = ke()), O(c), Ee(!1), (t = !0));
+                    for (var r = new Set(), u = M, v = tn(), y = 0; y < e; y += 1) {
+                        E &&
+                            D.nodeType === 8 &&
+                            D.data === `]` &&
+                            ((c = D), (t = !0), Ee(!1));
+                        var b = p[y],
+                            x = a(b, y),
+                            S = h ? null : l.get(x);
+                        (S
+                            ? (S.v && zt(S.v, b),
+                                S.i && zt(S.i, y),
+                                v && u.unskip_effect(S.e))
+                            : ((S = Or(l, h ? c : (wr ??= Xt()), b, x, y, o, n, i)),
+                                h || (S.e.f |= te),
+                                l.set(x, S)),
+                            r.add(x));
+                    }
+                    if (
+                        (e === 0 &&
+                            s &&
+                            !d &&
+                            (h
+                                ? (d = R(() => s(c)))
+                                : ((d = R(() => s((wr ??= Xt())))), (d.f |= te))),
+                            e > r.size && fe(``, ``, ``),
+                            E && e > 0 && O(ke()),
+                            !h)
+                    )
+                        if ((m.set(u, r), v)) {
+                            for (let [e, t] of l) r.has(e) || u.skip_effect(t.e);
+                            (u.oncommit(g), u.ondiscard(_));
+                        } else g(u);
+                    (t && Ee(!0), J(f));
+                }),
+                flags: n,
+                items: l,
+                pending: m,
+                outrogroups: null,
+                fallback: d,
+            };
+            ((h = !1), E && (c = D));
+        }
+        function Er(e) {
+            for (; e !== null && !(e.f & 32);) e = e.next;
+            return e;
+        }
+        function Dr(e, t, n, i, a) {
+            var o = (i & 8) != 0,
+                s = t.length,
+                c = e.items,
+                l = Er(e.effect.first),
+                u,
+                d = null,
+                f,
+                p = [],
+                m = [],
+                h,
+                g,
+                _,
+                v;
+            if (o)
+                for (v = 0; v < s; v += 1)
+                    ((h = t[v]),
+                        (g = a(h, v)),
+                        (_ = c.get(g).e),
+                        _.f & 33554432 ||
+                        (_.nodes?.a?.measure(), (f ??= new Set()).add(_)));
+            for (v = 0; v < s; v += 1) {
+                if (
+                    ((h = t[v]),
+                        (g = a(h, v)),
+                        (_ = c.get(g).e),
+                        e.outrogroups !== null)
+                )
+                    for (let t of e.outrogroups)
+                        (t.pending.delete(_), t.done.delete(_));
+                if (
+                    (_.f & 8192 &&
+                        (kn(_), o && (_.nodes?.a?.unfix(), (f ??= new Set()).delete(_))),
+                        _.f & 33554432)
+                )
+                    if (((_.f ^= te), _ === l)) kr(_, null, n);
+                    else {
+                        var y = d ? d.next : l;
+                        (_ === e.effect.last && (e.effect.last = _.prev),
+                            _.prev && (_.prev.next = _.next),
+                            _.next && (_.next.prev = _.prev),
+                            Ar(e, d, _),
+                            Ar(e, _, y),
+                            kr(_, y, n),
+                            (d = _),
+                            (p = []),
+                            (m = []),
+                            (l = Er(d.next)));
+                        continue;
+                    }
+                if (_ !== l) {
+                    if (u !== void 0 && u.has(_)) {
+                        if (p.length < m.length) {
+                            var b = m[0],
+                                x;
+                            d = b.prev;
+                            var S = p[0],
+                                ee = p[p.length - 1];
+                            for (x = 0; x < p.length; x += 1) kr(p[x], b, n);
+                            for (x = 0; x < m.length; x += 1) u.delete(m[x]);
+                            (Ar(e, S.prev, ee.next),
+                                Ar(e, d, S),
+                                Ar(e, ee, b),
+                                (l = b),
+                                (d = ee),
+                                --v,
+                                (p = []),
+                                (m = []));
+                        } else
+                            (u.delete(_),
+                                kr(_, l, n),
+                                Ar(e, _.prev, _.next),
+                                Ar(e, _, d === null ? e.effect.first : d.next),
+                                Ar(e, d, _),
+                                (d = _));
+                        continue;
+                    }
+                    for (p = [], m = []; l !== null && l !== _;)
+                        ((u ??= new Set()).add(l), m.push(l), (l = Er(l.next)));
+                    if (l === null) continue;
+                }
+                (_.f & 33554432 || p.push(_), (d = _), (l = Er(_.next)));
+            }
+            if (e.outrogroups !== null) {
+                for (let t of e.outrogroups)
+                    t.pending.size === 0 &&
+                        (Cr(e, r(t.done)), e.outrogroups?.delete(t));
+                e.outrogroups.size === 0 && (e.outrogroups = null);
+            }
+            if (l !== null || u !== void 0) {
+                var C = [];
+                if (u !== void 0) for (_ of u) _.f & 8192 || C.push(_);
+                for (; l !== null;)
+                    (!(l.f & 8192) && l !== e.fallback && C.push(l), (l = Er(l.next)));
+                var ne = C.length;
+                if (ne > 0) {
+                    var re = i & 4 && s === 0 ? n : null;
+                    if (o) {
+                        for (v = 0; v < ne; v += 1) C[v].nodes?.a?.measure();
+                        for (v = 0; v < ne; v += 1) C[v].nodes?.a?.fix();
+                    }
+                    Sr(e, C, re);
+                }
+            }
+            o &&
+                Ue(() => {
+                    if (f !== void 0) for (_ of f) _.nodes?.a?.apply();
+                });
+        }
+        function Or(e, t, n, r, i, a, o, s) {
+            var c = o & 1 ? (o & 16 ? It(n) : P(n, !1, !1)) : null,
+                l = o & 2 ? It(i) : null;
+            return {
+                v: c,
+                i: l,
+                e: R(
+                    () => (
+                        a(t, c ?? n, l ?? i, s),
+                        () => {
+                            e.delete(r);
+                        }
+                    ),
+                ),
+            };
+        }
+        function kr(e, t, n) {
+            if (e.nodes)
+                for (
+                    var r = e.nodes.start,
+                    i = e.nodes.end,
+                    a = t && !(t.f & 33554432) ? t.nodes.start : n;
+                    r !== null;
+                ) {
+                    var o = Qt(r);
+                    if ((a.before(r), r === i)) return;
+                    r = o;
+                }
+        }
+        function Ar(e, t, n) {
+            (t === null ? (e.effect.first = n) : (t.next = n),
+                n === null ? (e.effect.last = t) : (n.prev = t));
+        }
+        var jr = [
+            ...` 	
+\r\f\xA0\v﻿`,
+        ];
+        function Mr(e, t, n) {
+            var r = e == null ? `` : `` + e;
+            if ((t && (r = r ? r + ` ` + t : t), n)) {
+                for (var i of Object.keys(n))
+                    if (n[i]) r = r ? r + ` ` + i : i;
+                    else if (r.length)
+                        for (var a = i.length, o = 0; (o = r.indexOf(i, o)) >= 0;) {
+                            var s = o + a;
+                            (o === 0 || jr.includes(r[o - 1])) &&
+                                (s === r.length || jr.includes(r[s]))
+                                ? (r =
+                                    (o === 0 ? `` : r.substring(0, o)) + r.substring(s + 1))
+                                : (o = s);
+                        }
+            }
+            return r === `` ? null : r;
+        }
+        function Nr(e, t = !1) {
+            var n = t ? ` !important;` : `;`,
+                r = ``;
+            for (var i of Object.keys(e)) {
+                var a = e[i];
+                a != null && a !== `` && (r += ` ` + i + `: ` + a + n);
+            }
+            return r;
+        }
+        function Pr(e) {
+            return e[0] !== `-` || e[1] !== `-` ? e.toLowerCase() : e;
+        }
+        function Fr(e, t) {
+            if (t) {
+                var n = ``,
+                    r,
+                    i;
+                if ((Array.isArray(t) ? ((r = t[0]), (i = t[1])) : (r = t), e)) {
+                    e = String(e)
+                        .replaceAll(/\s*\/\*.*?\*\/\s*/g, ``)
+                        .trim();
+                    var a = !1,
+                        o = 0,
+                        s = !1,
+                        c = [];
+                    (r && c.push(...Object.keys(r).map(Pr)),
+                        i && c.push(...Object.keys(i).map(Pr)));
+                    var l = 0,
+                        u = -1;
+                    let t = e.length;
+                    for (var d = 0; d < t; d++) {
+                        var f = e[d];
+                        if (
+                            (s
+                                ? f === `/` && e[d - 1] === `*` && (s = !1)
+                                : a
+                                    ? a === f && (a = !1)
+                                    : f === `/` && e[d + 1] === `*`
+                                        ? (s = !0)
+                                        : f === `"` || f === `'`
+                                            ? (a = f)
+                                            : f === `(`
+                                                ? o++
+                                                : f === `)` && o--,
+                                !s && a === !1 && o === 0)
+                        ) {
+                            if (f === `:` && u === -1) u = d;
+                            else if (f === `;` || d === t - 1) {
+                                if (u !== -1) {
+                                    var p = Pr(e.substring(l, u).trim());
+                                    if (!c.includes(p)) {
+                                        f !== `;` && d++;
+                                        var m = e.substring(l, d).trim();
+                                        n += ` ` + m + `;`;
+                                    }
+                                }
+                                ((l = d + 1), (u = -1));
+                            }
+                        }
+                    }
+                }
+                return (
+                    r && (n += Nr(r)),
+                    i && (n += Nr(i, !0)),
+                    (n = n.trim()),
+                    n === `` ? null : n
+                );
+            }
+            return e == null ? null : String(e);
+        }
+        function Ir(e, t, n, r, i, a) {
+            var o = e.__className;
+            if (E || o !== n || o === void 0) {
+                var s = Mr(n, r, a);
+                ((!E || s !== e.getAttribute(`class`)) &&
+                    (s == null
+                        ? e.removeAttribute(`class`)
+                        : t
+                            ? (e.className = s)
+                            : e.setAttribute(`class`, s)),
+                    (e.__className = n));
+            } else if (a && i !== a)
+                for (var c in a) {
+                    var l = !!a[c];
+                    (i == null || l !== !!i[c]) && e.classList.toggle(c, l);
+                }
+            return a;
+        }
+        function Lr(e, t = {}, n, r) {
+            for (var i in n) {
+                var a = n[i];
+                t[i] !== a &&
+                    (n[i] == null
+                        ? e.style.removeProperty(i)
+                        : e.style.setProperty(i, a, r));
+            }
+        }
+        function Rr(e, t, n, r) {
+            var i = e.__style;
+            if (E || i !== t) {
+                var a = Fr(t, r);
+                ((!E || a !== e.getAttribute(`style`)) &&
+                    (a == null ? e.removeAttribute(`style`) : (e.style.cssText = a)),
+                    (e.__style = t));
+            } else
+                r &&
+                    (Array.isArray(r)
+                        ? (Lr(e, n?.[0], r[0]), Lr(e, n?.[1], r[1], `important`))
+                        : Lr(e, n, r));
+            return r;
+        }
+        var zr = Symbol(`is custom element`),
+            Br = Symbol(`is html`),
+            Vr = le ? `link` : `LINK`;
+        function $(e, t, n, r) {
+            var i = Hr(e);
+            (E &&
+                ((i[t] = e.getAttribute(t)),
+                    t === `src` ||
+                    t === `srcset` ||
+                    (t === `href` && e.nodeName === Vr))) ||
+                (i[t] !== (i[t] = n) &&
+                    (t === `loading` && (e[se] = n),
+                        n == null
+                            ? e.removeAttribute(t)
+                            : typeof n != `string` && Wr(e).includes(t)
+                                ? (e[t] = n)
+                                : e.setAttribute(t, n)));
+        }
+        function Hr(e) {
+            return (e.__attributes ??= {
+                [zr]: e.nodeName.includes(`-`),
+                [Br]: e.namespaceURI === Ce,
+            });
+        }
+        var Ur = new Map();
+        function Wr(e) {
+            var t = e.getAttribute(`is`) || e.nodeName,
+                n = Ur.get(t);
+            if (n) return n;
+            Ur.set(t, (n = []));
+            for (var r, i = e, a = Element.prototype; a !== i;) {
+                for (var s in ((r = o(i)), r)) r[s].set && n.push(s);
+                i = l(i);
+            }
+            return n;
+        }
+        function Gr(e, t) {
+            return e === t || e?.[w] === t;
+        }
+        function Kr(e = {}, t, n, r) {
+            var i = A.r,
+                a = H;
+            return (
+                hn(() => {
+                    var o, s;
+                    return (
+                        yn(() => {
+                            ((o = s),
+                                (s = r?.() || []),
+                                Y(() => {
+                                    e !== n(...s) &&
+                                        (t(e, ...s), o && Gr(n(...o), e) && t(null, ...o));
+                                }));
+                        }),
+                        () => {
+                            let r = a;
+                            for (; r !== i && r.parent !== null && r.parent.f & 33554432;)
+                                r = r.parent;
+                            let o = () => {
+                                s && Gr(n(...s), e) && t(null, ...s);
+                            },
+                                c = r.teardown;
+                            r.teardown = () => {
+                                (o(), c?.());
+                            };
+                        }
+                    );
+                }),
+                e
+            );
+        }
+        function qr(e = !1) {
+            let t = A,
+                n = t.l.u;
+            if (!n) return;
+            let r = () => X(t.s);
+            if (e) {
+                let e = 0,
+                    n = {},
+                    i = wt(() => {
+                        let r = !1,
+                            i = t.s;
+                        for (let e in i) i[e] !== n[e] && ((n[e] = i[e]), (r = !0));
+                        return (r && e++, e);
+                    });
+                r = () => J(i);
+            }
+            (n.b.length &&
+                pn(() => {
+                    (Jr(t, r), p(n.b));
+                }),
+                dn(() => {
+                    let e = Y(() => n.m.map(f));
+                    return () => {
+                        for (let t of e) typeof t == `function` && t();
+                    };
+                }),
+                n.a.length &&
+                dn(() => {
+                    (Jr(t, r), p(n.a));
+                }));
+        }
+        function Jr(e, t) {
+            if (e.l.s) for (let t of e.l.s) J(t);
+            t();
+        }
+        function Yr(e, t, n, r) {
+            var i = !Fe || (n & 2) != 0,
+                o = (n & 8) != 0,
+                s = (n & 16) != 0,
+                c = r,
+                l = !0,
+                u = () => (l && ((l = !1), (c = s ? Y(r) : r)), c);
+            let d;
+            if (o) {
+                var f = w in e || oe in e;
+                d = a(e, t)?.set ?? (f && t in e ? (n) => (e[t] = n) : void 0);
+            }
+            var p,
+                m = !1;
+            (o ? ([p, m] = Qe(() => e[t])) : (p = e[t]),
+                p === void 0 && r !== void 0 && ((p = u()), d && (i && _e(t), d(p))));
+            var h = i
+                ? () => {
+                    var n = e[t];
+                    return n === void 0 ? u() : ((l = !0), n);
+                }
+                : () => {
+                    var n = e[t];
+                    return (n !== void 0 && (c = void 0), n === void 0 ? c : n);
+                };
+            if (i && !(n & 4)) return h;
+            if (d) {
+                var g = e.$$legacy;
+                return function (e, t) {
+                    return arguments.length > 0
+                        ? ((!i || !t || g || m) && d(t ? h() : e), e)
+                        : h();
+                };
+            }
+            var _ = !1,
+                v = (n & 1 ? wt : Et)(() => ((_ = !1), h()));
+            o && J(v);
+            var y = H;
+            return function (e, t) {
+                if (arguments.length > 0) {
+                    let n = t ? J(v) : i && o ? Wt(e) : e;
+                    return (F(v, n), (_ = !0), c !== void 0 && (c = n), e);
+                }
+                return (Pn && _) || y.f & 16384 ? v.v : J(v);
+            };
+        }
+        function Xr(e) {
+            (A === null && ue(`onMount`),
+                Fe && A.l !== null
+                    ? $r(A).m.push(e)
+                    : dn(() => {
+                        let t = Y(e);
+                        if (typeof t == `function`) return t;
+                    }));
+        }
+        function Zr(e, t, { bubbles: n = !1, cancelable: r = !1 } = {}) {
+            return new CustomEvent(e, { detail: t, bubbles: n, cancelable: r });
+        }
+        function Qr() {
+            let t = A;
+            return (
+                t === null && ue(`createEventDispatcher`),
+                (n, r, i) => {
+                    let a = t.s.$$events?.[n];
+                    if (a) {
+                        let o = e(a) ? a.slice() : [a],
+                            s = Zr(n, r, i);
+                        for (let e of o) e.call(t.x, s);
+                        return !s.defaultPrevented;
+                    }
+                    return !0;
+                }
+            );
+        }
+        function $r(e) {
+            var t = e.l;
+            return (t.u ??= { a: [], b: [], m: [] });
+        }
+        (typeof window < `u` &&
+            ((window.__svelte ??= {}).v ??= new Set()).add(`5`),
+            Ie());
+        var ei = pr(
+            `<rect x="79" y="5" width="2" fill="#c9a84c" class="svelte-ct3afm"></rect>`,
+        ),
+            ti = pr(
+                `<g class="svelte-ct3afm"><path d="M0,-5 L1.2,-1.6 L4.8,-1.6 L1.9,0.6 L3,4.1 L0,2 L-3,4.1 L-1.9,0.6 L-4.8,-1.6 L-1.2,-1.6 Z" fill="#f5d78e" opacity="0.7" class="svelte-ct3afm"></path></g>`,
+            ),
+            ni = pr(
+                `<rect x="79" y="5" width="2" fill="#b89235" class="svelte-ct3afm"></rect>`,
+            ),
+            ri = pr(
+                `<circle r="2.5" fill="#e8c96a" opacity="0.45" class="svelte-ct3afm"></circle>`,
+            ),
+            ii = Z(
+                `<div class="coin-scene svelte-ct3afm"><div><div class="face heads svelte-ct3afm"><svg width="160" height="160" viewBox="0 0 160 160" fill="none" class="svelte-ct3afm"><defs class="svelte-ct3afm"><radialGradient id="hBg" cx="40%" cy="35%" class="svelte-ct3afm"><stop offset="0%" stop-color="#e8c96a" class="svelte-ct3afm"></stop><stop offset="50%" stop-color="#c9a84c" class="svelte-ct3afm"></stop><stop offset="100%" stop-color="#8a6e2a" class="svelte-ct3afm"></stop></radialGradient><radialGradient id="hRim" cx="50%" cy="50%" class="svelte-ct3afm"><stop offset="70%" stop-color="transparent" class="svelte-ct3afm"></stop><stop offset="85%" stop-color="#b8922a" class="svelte-ct3afm"></stop><stop offset="100%" stop-color="#f5d78e" class="svelte-ct3afm"></stop></radialGradient><filter id="innerShadow" class="svelte-ct3afm"><feGaussianBlur stdDeviation="4" result="blur" class="svelte-ct3afm"></feGaussianBlur><feComposite in="SourceGraphic" in2="blur" operator="over" class="svelte-ct3afm"></feComposite></filter></defs><circle cx="80" cy="80" r="76" fill="#8a6e2a" class="svelte-ct3afm"></circle><circle cx="80" cy="80" r="74" fill="url(#hBg)" class="svelte-ct3afm"></circle><!><circle cx="80" cy="80" r="65" stroke="#b8922a" stroke-width="1.5" fill="none" opacity="0.6" class="svelte-ct3afm"></circle><circle cx="80" cy="80" r="63" stroke="#f5d78e" stroke-width="0.5" fill="none" opacity="0.4" class="svelte-ct3afm"></circle><ellipse cx="80" cy="68" rx="16" ry="19" fill="#b8892a" opacity="0.9" class="svelte-ct3afm"></ellipse><ellipse cx="80" cy="95" rx="22" ry="14" fill="#b8892a" opacity="0.7" class="svelte-ct3afm"></ellipse><circle cx="80" cy="62" r="11" fill="#c9a84c" opacity="0.8" class="svelte-ct3afm"></circle><!><text x="80" y="132" text-anchor="middle" font-family="Cinzel, serif" font-size="10" font-weight="600" fill="#f5d78e" letter-spacing="4" opacity="0.85" class="svelte-ct3afm">HEADS</text><text x="80" y="50" text-anchor="middle" font-family="Cinzel, serif" font-size="8" fill="#e8c96a" letter-spacing="2" opacity="0.6" class="svelte-ct3afm">MMXXVI</text><ellipse cx="62" cy="52" rx="18" ry="12" fill="white" opacity="0.06" transform="rotate(-20 62 52)" class="svelte-ct3afm"></ellipse></svg></div> <div class="face tails svelte-ct3afm"><svg width="160" height="160" viewBox="0 0 160 160" fill="none" class="svelte-ct3afm"><defs class="svelte-ct3afm"><radialGradient id="tBg" cx="60%" cy="65%" class="svelte-ct3afm"><stop offset="0%" stop-color="#d4b456" class="svelte-ct3afm"></stop><stop offset="50%" stop-color="#b89235" class="svelte-ct3afm"></stop><stop offset="100%" stop-color="#7a5e1e" class="svelte-ct3afm"></stop></radialGradient></defs><circle cx="80" cy="80" r="76" fill="#7a5e1e" class="svelte-ct3afm"></circle><circle cx="80" cy="80" r="74" fill="url(#tBg)" class="svelte-ct3afm"></circle><!><circle cx="80" cy="80" r="65" stroke="#a07e25" stroke-width="1.5" fill="none" opacity="0.6" class="svelte-ct3afm"></circle><circle cx="80" cy="80" r="63" stroke="#e8c96a" stroke-width="0.5" fill="none" opacity="0.4" class="svelte-ct3afm"></circle><path d="M80 55 L95 68 L105 63 L95 80 L80 73 L65 80 L55 63 L65 68 Z" fill="#c9a84c" opacity="0.75" class="svelte-ct3afm"></path><ellipse cx="80" cy="82" rx="8" ry="12" fill="#b8922a" opacity="0.9" class="svelte-ct3afm"></ellipse><circle cx="80" cy="68" r="7" fill="#c9a84c" opacity="0.85" class="svelte-ct3afm"></circle><path d="M84 67 L88 69 L84 71" fill="#e8c96a" opacity="0.7" class="svelte-ct3afm"></path><!><text x="80" y="132" text-anchor="middle" font-family="Cinzel, serif" font-size="10" font-weight="600" fill="#e8c96a" letter-spacing="4" opacity="0.85" class="svelte-ct3afm">TAILS</text><ellipse cx="98" cy="108" rx="16" ry="10" fill="white" opacity="0.04" transform="rotate(20 98 108)" class="svelte-ct3afm"></ellipse></svg></div> <div class="coin-glow svelte-ct3afm"></div></div></div>`,
+            );
+        function ai(e, t) {
+            Re(t, !1);
+            let n = P(),
+                r = Yr(t, `flipping`, 8, !1),
+                i = Yr(t, `result`, 8, null);
+            (gn(
+                () => X(i()),
+                () => {
+                    F(n, i() === `heads` || i() === null);
+                },
+            ),
+                _n());
+            var a = ii(),
+                o = I(a);
+            let s;
+            var c = I(o),
+                l = I(c),
+                u = L(I(l), 3);
+            (Tr(
+                u,
+                0,
+                () => Array(60),
+                xr,
+                (e, t, n) => {
+                    var r = ei();
+                    ($(r, `height`, n % 5 == 0 ? 8 : 5),
+                        $(r, `opacity`, n % 5 == 0 ? 0.7 : 0.3),
+                        $(r, `transform`, `rotate(${n * 6} 80 80)`),
+                        Q(e, r));
+                },
+            ),
+                Tr(
+                    L(u, 6),
+                    0,
+                    () => [45, 115],
+                    xr,
+                    (e, t) => {
+                        var n = ti();
+                        (bn(() => $(n, `transform`, `translate(${t ?? ``}, 100)`)),
+                            Q(e, n));
+                    },
+                ),
+                Oe(3),
+                k(l),
+                k(c));
+            var d = L(c, 2),
+                f = I(d),
+                p = L(I(f), 3);
+            (Tr(
+                p,
+                0,
+                () => Array(60),
+                xr,
+                (e, t, n) => {
+                    var r = ni();
+                    ($(r, `height`, n % 5 == 0 ? 8 : 5),
+                        $(r, `opacity`, n % 5 == 0 ? 0.7 : 0.3),
+                        $(r, `transform`, `rotate(${n * 6} 80 80)`),
+                        Q(e, r));
+                },
+            ),
+                Tr(
+                    L(p, 7),
+                    0,
+                    () => Array(12),
+                    xr,
+                    (e, t, n) => {
+                        var r = ri();
+                        (bn(
+                            (e, t) => {
+                                ($(r, `cx`, e), $(r, `cy`, t));
+                            },
+                            [
+                                () =>
+                                    Y(
+                                        () =>
+                                            80 +
+                                            42 * Math.cos((n / 12) * Math.PI * 2 - Math.PI / 2),
+                                    ),
+                                () =>
+                                    Y(
+                                        () =>
+                                            80 +
+                                            42 * Math.sin((n / 12) * Math.PI * 2 - Math.PI / 2),
+                                    ),
+                            ],
+                        ),
+                            Q(e, r));
+                    },
+                ),
+                Oe(2),
+                k(f),
+                k(d),
+                Oe(2),
+                k(o),
+                k(a),
+                bn(
+                    () =>
+                    (s = Ir(o, 1, `coin svelte-ct3afm`, null, s, {
+                        flipping: r(),
+                        "show-tails": i() === `tails`,
+                    })),
+                ),
+                Q(e, a),
+                ze());
+        }
+        var oi = Z(
+            `<button class="reset-btn svelte-1lr08k"><svg width="11" height="11" viewBox="0 0 11 11" fill="none" class="svelte-1lr08k"><path d="M5.5 1.5 A4 4 0 0 1 9.5 5.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" class="svelte-1lr08k"></path><path d="M5.5 9.5 A4 4 0 0 1 1.5 5.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" class="svelte-1lr08k"></path><path d="M9.5 3.5 L9.5 5.5 L7.5 5.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" class="svelte-1lr08k"></path></svg> RESET</button>`,
+        ),
+            si = Z(
+                `<div class="streak-notice svelte-1lr08k"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="svelte-1lr08k"><path d="M6 1 L7.2 4.4 L11 4.4 L8 6.6 L9.2 10 L6 8 L2.8 10 L4 6.6 L1 4.4 L4.8 4.4 Z" fill="currentColor" class="svelte-1lr08k"></path></svg> </div>`,
+            ),
+            ci = Z(
+                `<div class="bar-section svelte-1lr08k"><div class="bar-labels svelte-1lr08k"><span class="svelte-1lr08k"> </span> <span class="svelte-1lr08k"> </span></div> <div class="bar-track svelte-1lr08k"><div class="bar-fill svelte-1lr08k"></div></div></div> <!>`,
+                1,
+            ),
+            li = Z(
+                `<div class="stats-panel svelte-1lr08k"><div class="stats-header svelte-1lr08k"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="svelte-1lr08k"><rect x="1" y="1" width="12" height="12" rx="2" stroke="var(--gold)" stroke-width="0.8" opacity="0.5" class="svelte-1lr08k"></rect><line x1="4" y1="10" x2="4" y2="6" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" class="svelte-1lr08k"></line><line x1="7" y1="10" x2="7" y2="4" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" class="svelte-1lr08k"></line><line x1="10" y1="10" x2="10" y2="7" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" class="svelte-1lr08k"></line></svg> <span class="svelte-1lr08k">SESSION ORACLE</span> <!></div> <div class="stat-grid svelte-1lr08k"><div class="stat-item svelte-1lr08k"><span class="stat-val svelte-1lr08k"> </span> <span class="stat-key svelte-1lr08k">FLIPS</span></div> <div class="stat-item svelte-1lr08k"><span class="stat-val svelte-1lr08k"> </span> <span class="stat-key svelte-1lr08k">HEADS</span></div> <div class="stat-item svelte-1lr08k"><span class="stat-val svelte-1lr08k"> </span> <span class="stat-key svelte-1lr08k">TAILS</span></div> <div class="stat-item svelte-1lr08k"><span class="stat-val streak svelte-1lr08k"> </span> <span class="stat-key svelte-1lr08k">STREAK</span></div></div> <!></div>`,
+            );
+        function ui(e, t) {
+            Re(t, !1);
+            let n = P(),
+                r = P(),
+                i = Yr(t, `stats`, 24, () => ({
+                    heads: 0,
+                    tails: 0,
+                    streak: 0,
+                    lastStreak: `heads`,
+                })),
+                a = Yr(t, `totalFlips`, 8, 0),
+                o = Qr();
+            (gn(
+                () => (X(a()), X(i())),
+                () => {
+                    F(n, a() ? Math.round((i().heads / a()) * 100) : 50);
+                },
+            ),
+                gn(
+                    () => (X(a()), X(i())),
+                    () => {
+                        F(r, a() ? Math.round((i().tails / a()) * 100) : 50);
+                    },
+                ),
+                _n(),
+                qr());
+            var s = li(),
+                c = I(s),
+                l = L(I(c), 4),
+                u = (e) => {
+                    var t = oi();
+                    (ar(`click`, t, () => o(`reset`)), Q(e, t));
+                };
+            (br(l, (e) => {
+                a() > 0 && e(u);
+            }),
+                k(c));
+            var d = L(c, 2),
+                f = I(d),
+                p = I(f),
+                m = I(p, !0);
+            (k(p), Oe(2), k(f));
+            var h = L(f, 2),
+                g = I(h),
+                _ = I(g, !0);
+            (k(g), Oe(2), k(h));
+            var v = L(h, 2),
+                y = I(v),
+                b = I(y, !0);
+            (k(y), Oe(2), k(v));
+            var x = L(v, 2),
+                S = I(x),
+                ee = I(S, !0);
+            (k(S), Oe(2), k(x), k(d));
+            var C = L(d, 2),
+                te = (e) => {
+                    var t = ci(),
+                        a = $t(t),
+                        o = I(a),
+                        s = I(o),
+                        c = I(s);
+                    k(s);
+                    var l = L(s, 2),
+                        u = I(l);
+                    (k(l), k(o));
+                    var d = L(o, 2),
+                        f = I(d);
+                    (k(d), k(a));
+                    var p = L(a, 2),
+                        m = (e) => {
+                            var t = si(),
+                                n = L(I(t));
+                            (k(t),
+                                bn(
+                                    (e) =>
+                                        mr(
+                                            n,
+                                            ` ${(X(i()), Y(() => i().streak)) ?? ``}× ${e ?? ``} STREAK`,
+                                        ),
+                                    [() => (X(i()), Y(() => i().lastStreak?.toUpperCase()))],
+                                ),
+                                Q(e, t));
+                        };
+                    (br(p, (e) => {
+                        (X(i()), Y(() => i().streak >= 3) && e(m));
+                    }),
+                        bn(() => {
+                            (mr(c, `H ${J(n) ?? ``}%`),
+                                mr(u, `T ${J(r) ?? ``}%`),
+                                Rr(f, `width: ${J(n) ?? ``}%`));
+                        }),
+                        Q(e, t));
+                };
+            (br(C, (e) => {
+                a() > 0 && e(te);
+            }),
+                k(s),
+                bn(() => {
+                    (mr(m, a()),
+                        mr(_, (X(i()), Y(() => i().heads))),
+                        mr(b, (X(i()), Y(() => i().tails))),
+                        mr(ee, (X(i()), Y(() => i().streak))));
+                }),
+                Q(e, s),
+                ze());
+        }
+        var di = pr(
+            `<svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="17" stroke="currentColor" stroke-width="1.5"></circle><path d="M10 18 L16 24 L26 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>`,
+        ),
+            fi = pr(
+                `<svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="17" stroke="currentColor" stroke-width="1.5"></circle><path d="M12 12 L24 24 M24 12 L12 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></path></svg>`,
+            ),
+            pi = pr(
+                `<svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="17" stroke="currentColor" stroke-width="1.5"></circle><path d="M18 6 L21 15 L30 15 L23 21 L26 30 L18 24 L10 30 L13 21 L6 15 L15 15 Z" fill="currentColor" opacity="0.7"></path></svg>`,
+            ),
+            mi = Z(
+                `<span class="label svelte-1tpupto">FATE FAVORS YOU</span> <span class="sub svelte-1tpupto"> </span>`,
+                1,
+            ),
+            hi = Z(
+                `<span class="label svelte-1tpupto">THE COIN DEFIED YOU</span> <span class="sub svelte-1tpupto"> </span>`,
+                1,
+            ),
+            gi = Z(
+                `<span class="label svelte-1tpupto"> </span> <span class="sub svelte-1tpupto">the coin has spoken</span>`,
+                1,
+            ),
+            _i = Z(
+                `<div><div class="flash-icon"><!></div> <div class="flash-text svelte-1tpupto"><!></div></div>`,
+            );
+        function vi(e, t) {
+            Re(t, !1);
+            let n = Yr(t, `result`, 8, null),
+                r = Yr(t, `verdict`, 8, null);
+            qr();
+            var i = _i();
+            let a;
+            var o = I(i),
+                s = I(o),
+                c = (e) => {
+                    Q(e, di());
+                },
+                l = (e) => {
+                    Q(e, fi());
+                },
+                u = (e) => {
+                    Q(e, pi());
+                };
+            (br(s, (e) => {
+                r() === `win` ? e(c) : r() === `lose` ? e(l, 1) : e(u, -1);
+            }),
+                k(o));
+            var d = L(o, 2),
+                f = I(d),
+                p = (e) => {
+                    var t = mi(),
+                        r = L($t(t), 2),
+                        i = I(r, !0);
+                    (k(r),
+                        bn(
+                            (e) => mr(i, e),
+                            [() => (X(n()), Y(() => n()?.toUpperCase()))],
+                        ),
+                        Q(e, t));
+                },
+                m = (e) => {
+                    var t = hi(),
+                        r = L($t(t), 2),
+                        i = I(r, !0);
+                    (k(r),
+                        bn(
+                            (e) => mr(i, e),
+                            [() => (X(n()), Y(() => n()?.toUpperCase()))],
+                        ),
+                        Q(e, t));
+                },
+                h = (e) => {
+                    var t = gi(),
+                        r = $t(t),
+                        i = I(r, !0);
+                    (k(r),
+                        Oe(2),
+                        bn(
+                            (e) => mr(i, e),
+                            [() => (X(n()), Y(() => n()?.toUpperCase()))],
+                        ),
+                        Q(e, t));
+                };
+            (br(f, (e) => {
+                r() === `win` ? e(p) : r() === `lose` ? e(m, 1) : e(h, -1);
+            }),
+                k(d),
+                k(i),
+                bn(
+                    () =>
+                    (a = Ir(i, 1, `flash svelte-1tpupto`, null, a, {
+                        win: r() === `win`,
+                        lose: r() === `lose`,
+                    })),
+                ),
+                Q(e, i),
+                ze());
+        }
+        var yi = Z(`<canvas class="svelte-rmxd5u"></canvas>`);
+        function bi(e, t) {
+            Re(t, !1);
+            let n = P(),
+                r,
+                i = [],
+                a,
+                o,
+                s;
+            function c() {
+                ((o = Rt(n, (J(n).width = window.innerWidth))),
+                    (s = Rt(n, (J(n).height = window.innerHeight))),
+                    (i = []));
+                let e = Math.min(60, Math.floor((o * s) / 2e4));
+                for (let t = 0; t < e; t++)
+                    i.push({
+                        x: Math.random() * o,
+                        y: Math.random() * s,
+                        r: Math.random() * 1.5 + 0.3,
+                        vx: (Math.random() - 0.5) * 0.2,
+                        vy: -Math.random() * 0.3 - 0.1,
+                        alpha: Math.random() * 0.4 + 0.05,
+                        phase: Math.random() * Math.PI * 2,
+                    });
+            }
+            function l() {
+                (r.clearRect(0, 0, o, s), Date.now() / 2e3);
+                for (let e of i) {
+                    ((e.x += e.vx), (e.y += e.vy), (e.phase += 0.008));
+                    let t = e.alpha * (0.6 + 0.4 * Math.sin(e.phase));
+                    (e.y < -10 && ((e.y = s + 10), (e.x = Math.random() * o)),
+                        e.x < -10 && (e.x = o + 10),
+                        e.x > o + 10 && (e.x = -10),
+                        r.beginPath(),
+                        r.arc(e.x, e.y, e.r, 0, Math.PI * 2),
+                        (r.fillStyle = `rgba(201, 168, 76, ${t})`),
+                        r.fill());
+                }
+                a = requestAnimationFrame(l);
+            }
+            (Xr(() => {
+                ((r = J(n).getContext(`2d`)), c(), l());
+                let e = () => c();
+                return (
+                    window.addEventListener(`resize`, e),
+                    () => {
+                        (cancelAnimationFrame(a),
+                            window.removeEventListener(`resize`, e));
+                    }
+                );
+            }),
+                qr());
+            var u = yi();
+            (Kr(
+                u,
+                (e) => F(n, e),
+                () => J(n),
+            ),
+                Q(e, u),
+                ze());
+        }
+        var xi = pr(
+            `<line x1="160" y1="16" x2="160" stroke="url(#ringGrad)"></line>`,
+        ),
+            Si = Z(
+                `<span class="flip-inner svelte-1n46o8q"><svg class="spin-icon svelte-1n46o8q" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5 A6.5 6.5 0 0 1 14.5 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path><path d="M8 14.5 A6.5 6.5 0 0 1 1.5 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg> CASTING FATE…</span>`,
+            ),
+            Ci = Z(
+                `<span class="flip-inner svelte-1n46o8q"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1 L9.8 6 L15 6 L10.8 9.3 L12.5 14.5 L8 11.5 L3.5 14.5 L5.2 9.3 L1 6 L6.2 6 Z" fill="currentColor" opacity="0.85"></path></svg> FLIP THE COIN</span>`,
+            ),
+            wi = Z(
+                `<!> <main><header class="svelte-1n46o8q"><div class="logo-mark"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="12" stroke="var(--gold)" stroke-width="1.2"></circle><path d="M13 4 L15.5 10.5 L13 8 L10.5 10.5 Z" fill="var(--gold)" opacity="0.8"></path><path d="M13 22 L10.5 15.5 L13 18 L15.5 15.5 Z" fill="var(--gold)" opacity="0.8"></path><circle cx="13" cy="13" r="3.5" stroke="var(--gold)" stroke-width="1"></circle><circle cx="13" cy="13" r="1.5" fill="var(--gold)"></circle></svg></div> <span class="wordmark svelte-1n46o8q">CoinFlipper</span> <div class="divider-v svelte-1n46o8q"></div> <span class="tagline svelte-1n46o8q">Bet Your Luck</span></header> <section class="arena svelte-1n46o8q"><div><svg class="ring-svg svelte-1n46o8q" viewBox="0 0 320 320" width="320" height="320"><defs><linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#c9a84c"></stop><stop offset="50%" stop-color="#f5d78e"></stop><stop offset="100%" stop-color="#c9a84c"></stop></linearGradient></defs><!><circle cx="160" cy="160" r="130" stroke="url(#ringGrad)" stroke-width="0.8" fill="none" opacity="0.25" stroke-dasharray="3 9"></circle><circle cx="160" cy="160" r="148" stroke="url(#ringGrad)" stroke-width="0.4" fill="none" opacity="0.12"></circle></svg></div> <div class="coin-wrapper svelte-1n46o8q"><!></div> <!></section> <section class="choice-row svelte-1n46o8q"><p class="choice-label svelte-1n46o8q">◈ PLACE YOUR CALL ◈</p> <div class="choice-btns svelte-1n46o8q"><button><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="10" stroke="currentColor" stroke-width="1.2"></circle><circle cx="11" cy="9" r="3.5" fill="currentColor" opacity="0.65"></circle><path d="M6 18 Q11 13.5 16 18" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"></path></svg> HEADS</button> <button><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="10" stroke="currentColor" stroke-width="1.2"></circle><path d="M6.5 8 Q11 6 15.5 8 L14.5 15 Q11 17 7.5 15 Z" stroke="currentColor" stroke-width="1.2" fill="none"></path><line x1="8.5" y1="10.5" x2="13.5" y2="10.5" stroke="currentColor" stroke-width="0.9" opacity="0.6"></line><line x1="8.5" y1="12.5" x2="13.5" y2="12.5" stroke="currentColor" stroke-width="0.9" opacity="0.4"></line></svg> TAILS</button></div></section> <button class="flip-btn svelte-1n46o8q"><!></button> <!></main>`,
+                1,
+            );
+        function Ti(e, t) {
+            Re(t, !1);
+            let n = P(!1),
+                r = P(null),
+                i = P(!1),
+                a = P({ heads: 0, tails: 0, streak: 0, lastStreak: `heads` }),
+                o = P(null),
+                s = P(null),
+                c = P(0),
+                l = P(!1);
+            Xr(() => {
+                F(l, !0);
+                try {
+                    let e = localStorage.getItem(`coinflip-stats`);
+                    if (e) {
+                        let t = JSON.parse(e);
+                        (F(
+                            a,
+                            t.stats || {
+                                heads: 0,
+                                tails: 0,
+                                streak: 0,
+                                lastStreak: `heads`,
+                            },
+                        ),
+                            F(c, t.totalFlips || 0));
+                    }
+                } catch { }
+            });
+            function u() {
+                try {
+                    localStorage.setItem(
+                        `coinflip-stats`,
+                        JSON.stringify({ stats: J(a), totalFlips: J(c) }),
+                    );
+                } catch { }
+            }
+            async function d() {
+                if (J(n)) return;
+                (F(n, !0),
+                    F(i, !1),
+                    F(s, null),
+                    F(r, null),
+                    await new Promise((e) => setTimeout(e, 1300)));
+                let e = Math.random() < 0.5 ? `heads` : `tails`;
+                (F(r, e),
+                    e === `heads` ? Rt(a, J(a).heads++) : Rt(a, J(a).tails++),
+                    J(o) && F(s, J(o) === e ? `win` : `lose`),
+                    e === J(a).lastStreak
+                        ? Rt(a, J(a).streak++)
+                        : (Rt(a, (J(a).streak = 1)), Rt(a, (J(a).lastStreak = e))),
+                    Vt(c),
+                    F(a, { ...J(a) }),
+                    u(),
+                    F(n, !1),
+                    F(i, !0),
+                    setTimeout(() => F(i, !1), 2200));
+            }
+            function f() {
+                (F(a, { heads: 0, tails: 0, streak: 0, lastStreak: `heads` }),
+                    F(r, null),
+                    F(s, null),
+                    F(o, null),
+                    F(c, 0),
+                    u());
+            }
+            qr();
+            var p = wi(),
+                m = $t(p);
+            bi(m, {});
+            var h = L(m, 2);
+            let g;
+            var _ = L(I(h), 2),
+                v = I(_);
+            let y;
+            var b = I(v);
+            (Tr(
+                L(I(b)),
+                0,
+                () => Array(36),
+                xr,
+                (e, t, n) => {
+                    var r = xi();
+                    ($(r, `y2`, n % 3 == 0 ? 38 : 28),
+                        $(r, `stroke-width`, n % 3 == 0 ? 2 : 0.8),
+                        $(r, `opacity`, n % 3 == 0 ? 0.9 : 0.35),
+                        $(r, `transform`, `rotate(${n * 10} 160 160)`),
+                        Q(e, r));
+                },
+            ),
+                Oe(2),
+                k(b),
+                k(v));
+            var x = L(v, 2);
+            (ai(I(x), {
+                get flipping() {
+                    return J(n);
+                },
+                get result() {
+                    return J(r);
+                },
+            }),
+                k(x));
+            var S = L(x, 2),
+                ee = (e) => {
+                    vi(e, {
+                        get result() {
+                            return J(r);
+                        },
+                        get verdict() {
+                            return J(s);
+                        },
+                    });
+                };
+            (br(S, (e) => {
+                J(i) && e(ee);
+            }),
+                k(_));
+            var C = L(_, 2),
+                te = L(I(C), 2),
+                ne = I(te);
+            let re;
+            var ie = L(ne, 2);
+            let ae;
+            (k(te), k(C));
+            var w = L(C, 2),
+                oe = I(w),
+                se = (e) => {
+                    Q(e, Si());
+                },
+                ce = (e) => {
+                    Q(e, Ci());
+                };
+            (br(oe, (e) => {
+                J(n) ? e(se) : e(ce, -1);
+            }),
+                k(w),
+                ui(L(w, 2), {
+                    get stats() {
+                        return J(a);
+                    },
+                    get totalFlips() {
+                        return J(c);
+                    },
+                    $$events: { reset: f },
+                }),
+                k(h),
+                bn(() => {
+                    ((g = Ir(h, 1, `svelte-1n46o8q`, null, g, { mounted: J(l) })),
+                        (y = Ir(v, 1, `oracle-ring svelte-1n46o8q`, null, y, {
+                            spinning: J(n),
+                        })),
+                        (re = Ir(ne, 1, `choice-btn svelte-1n46o8q`, null, re, {
+                            selected: J(o) === `heads`,
+                        })),
+                        (ae = Ir(ie, 1, `choice-btn svelte-1n46o8q`, null, ae, {
+                            selected: J(o) === `tails`,
+                        })),
+                        (w.disabled = J(n)));
+                }),
+                ar(`click`, ne, () => F(o, J(o) === `heads` ? null : `heads`)),
+                ar(`click`, ie, () => F(o, J(o) === `tails` ? null : `tails`)),
+                ar(`click`, w, d),
+                Q(e, p),
+                ze());
+        }
+        hr(Ti, { target: document.getElementById(`app`) });
+    </script>
+</body>
+
+</html>

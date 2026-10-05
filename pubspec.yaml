@@ -1,0 +1,79 @@
+name: wishable
+description: "A cross-platform, local-first personal wishlist and achievement tracker."
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.22.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Persistence (Drift over SQLite). The data-access layer is the ONLY layer
+  # permitted to depend on Drift (design R14.3).
+  drift: ^2.20.0
+  sqlite3: ^2.4.6
+  sqlite3_flutter_libs: ^0.5.20 # bundles SQLite on native platforms
+  drift_flutter: ^0.2.0 # convenience opener helpers (native)
+
+  # State management.
+  flutter_riverpod: ^2.5.1
+  riverpod: ^2.5.1
+
+  # Navigation.
+  go_router: ^14.2.0
+
+  # File I/O for backup/restore (export/import dialogs, native working dirs).
+  file_picker: ^8.0.6
+  path_provider: ^2.1.3
+  path: ^1.9.0
+
+  # Stable unique identifiers for Wishes (design R14.1).
+  uuid: ^4.4.0
+
+  # Authentication / app lock (auth spec, Option A). Secrets never leave the
+  # data layer; these are imported ONLY by data/auth implementations.
+  flutter_secure_storage: ^9.2.2 # Keychain/Keystore-backed verifier + token store
+  local_auth: ^2.3.0 # platform biometric prompt (Touch ID / Face ID / Windows Hello)
+  crypto: ^3.0.5 # PBKDF2/HMAC primitives for the passcode verifier
+
+  # Optional remote accounts + sync (auth spec, Option B). PocketBase backend.
+  # The SDK is imported ONLY by the adapter under data/account/remote/ so the
+  # local, offline-first app never depends on it (offline-first test, R14).
+  pocketbase: ^0.22.0 # official PocketBase Dart SDK
+  connectivity_plus: ^6.0.5 # observe connectivity so sync runs only when online
+
+  # Web persistence assets for Drift (WasmDatabase / OPFS).
+  web: ^1.1.0
+
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Drift code generation.
+  drift_dev: ^2.20.0
+  build_runner: ^2.4.11
+
+  # Property-based testing (design Testing Strategy).
+  glados: ^1.1.6
+
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Material Symbols icon set (design R13.4). The variable font is shipped as a
+  # bundled asset and exposed through the MaterialSymbols icon family.
+  fonts:
+    - family: MaterialSymbolsOutlined
+      fonts:
+        - asset: assets/fonts/MaterialSymbolsOutlined.ttf
+
+  assets:
+    - assets/
+    - assets/brand/
+    - assets/fonts/

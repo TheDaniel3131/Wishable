@@ -1,0 +1,24 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="wishableBrand" x1="64" y1="64" x2="448" y2="448" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6D5BF8"/>
+      <stop offset="1" stop-color="#9B4DFF"/>
+    </linearGradient>
+    <linearGradient id="wishableSpark" x1="192" y1="150" x2="320" y2="362" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F5A524"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded-square badge -->
+  <rect x="48" y="48" width="416" height="416" rx="112" fill="url(#wishableBrand)"/>
+  <!-- Four-point wish spark / shooting star -->
+  <path d="M256 140
+           C 268 196, 300 228, 356 240
+           C 300 252, 268 284, 256 340
+           C 244 284, 212 252, 156 240
+           C 212 228, 244 196, 256 140 Z"
+        fill="url(#wishableSpark)"/>
+  <!-- Small trailing sparkle -->
+  <circle cx="344" cy="168" r="16" fill="#FFFFFF" fill-opacity="0.9"/>
+  <circle cx="176" cy="332" r="10" fill="#FFFFFF" fill-opacity="0.7"/>
+</svg>

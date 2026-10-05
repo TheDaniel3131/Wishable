@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live Cart 🛒</title>
+    <style>
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: #f0f2f5;
+        display: flex;
+        justify-content: center;
+        padding-top: 40px;
+        color: #333;
+      }
+      .app-container {
+        width: 100%;
+        max-width: 400px;
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+      h2 {
+        margin: 0 0 5px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .status {
+        font-size: 0.8rem;
+        color: #28a745;
+        margin-bottom: 20px;
+        display: block;
+      }
+      .input-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr auto;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+      input {
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+      }
+      button#add-btn {
+        padding: 12px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      button#add-btn:hover {
+        background: #0056b3;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #eee;
+      }
+      li.bought {
+        opacity: 0.5;
+        text-decoration: line-through;
+        background: #f9f9f9;
+      }
+      .item-info {
+        display: flex;
+        flex-direction: column;
+      }
+      .item-qty {
+        font-size: 0.8rem;
+        color: #666;
+      }
+      .actions button {
+        background: none;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 5px 10px;
+        cursor: pointer;
+        margin-left: 5px;
+      }
+      .check-btn {
+        color: green;
+        border-color: green;
+      }
+      .del-btn {
+        color: red;
+        border-color: red;
+      }
+      .clear-btn {
+        width: 100%;
+        padding: 12px;
+        margin-top: 20px;
+        background: white;
+        border: 1px solid #ddd;
+        color: #666;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <h2>🛒 Live Cart</h2>
+      <span class="status" id="status">Connecting...</span>
+      <div class="input-row">
+        <input type="text" id="item-name" placeholder="Item (e.g. Milk)" />
+        <input
+          type="number"
+          id="item-qty"
+          placeholder="Qty"
+          value="1"
+          min="1"
+        />
+        <button id="add-btn">+</button>
+      </div>
+      <ul id="cart-list"></ul>
+      <button class="clear-btn" id="clear-btn">Remove Bought Items</button>
+    </div>
+    <script>
+      const nameInput = document.getElementById("item-name");
+      const qtyInput = document.getElementById("item-qty");
+      const addBtn = document.getElementById("add-btn");
+      const cartList = document.getElementById("cart-list");
+      const clearBtn = document.getElementById("clear-btn");
+      const statusDiv = document.getElementById("status"); // Connect const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'; const ws = new WebSocket(`${protocol}//${window.location.host}`); ws.onopen = () => { statusDiv.innerText = "● Live Sync Active"; }; ws.onmessage = (event) => { const data = JSON.parse(event.data); if (data.type === 'sync') { renderCart(data.cart); } }; // Add Item addBtn.addEventListener('click', () => { const name = nameInput.value.trim(); const qty = qtyInput.value.trim(); if (name && ws.readyState === WebSocket.OPEN) { ws.send(JSON.stringify({ type: 'add', name, qty })); nameInput.value = ''; qtyInput.value = '1'; nameInput.focus(); } }); nameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addBtn.click(); }); function renderCart(cart) { cartList.innerHTML = ''; // Sort: Unbought items first cart.sort((a, b) => a.bought - b.bought); cart.forEach(item => { const li = document.createElement('li'); if (item.bought) li.classList.add('bought'); li.innerHTML = ` <div class="item-info"> <strong>${item.name}</strong> <span class="item-qty">Qty: ${item.qty}</span> </div> <div class="actions"> <button class="check-btn" onclick="toggleItem(${item.id})">✓</button> <button class="del-btn" onclick="deleteItem(${item.id})">×</button> </div> `; cartList.appendChild(li); }); } window.toggleItem = (id) => { ws.send(JSON.stringify({ type: 'toggle', id })); }; window.deleteItem = (id) => { ws.send(JSON.stringify({ type: 'delete', id })); }; clearBtn.addEventListener('click', () => { ws.send(JSON.stringify({ type: 'clear' })); });
+    </script>
+  </body>
+</html>
