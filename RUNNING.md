@@ -104,19 +104,19 @@ Enable the auth methods you want:
 Add these fields (the app's own fields, distinct from PocketBase's auto
 `created`/`updated`):
 
-| field           | type                                      | notes                                             |
-| --------------- | ----------------------------------------- | ------------------------------------------------- |
-| `owner`         | Relation → `users`, single, required      | the signed-in user                                |
-| `wishId`        | Plain text                                | stable Wish UUID (sync identity)                  |
-| `title`         | Plain text                                |                                                   |
-| `description`   | Plain text                                | may be empty                                      |
-| `categoryName`  | Plain text                                | category by name                                  |
-| `priority`      | Select (single)                           | options: `low` / `medium` / `high`                |
-| `status`        | Select (single)                           | options: `active` / `in progress` / `completed`   |
-| `progress`      | Number                                    | 0–100                                             |
-| `wishCreatedAt` | Datetime                                  | device time (NOT Autodate)                        |
-| `wishUpdatedAt` | Datetime                                  | drives last-write-wins (NOT Autodate)             |
-| `wishDeletedAt` | Datetime                                  | empty = live; set = soft-delete tombstone         |
+| field           | type                                 | notes                                           |
+| --------------- | ------------------------------------ | ----------------------------------------------- |
+| `owner`         | Relation → `users`, single, required | the signed-in user                              |
+| `wishId`        | Plain text                           | stable Wish UUID (sync identity)                |
+| `title`         | Plain text                           |                                                 |
+| `description`   | Plain text                           | may be empty                                    |
+| `categoryName`  | Plain text                           | category by name                                |
+| `priority`      | Select (single)                      | options: `low` / `medium` / `high`              |
+| `status`        | Select (single)                      | options: `active` / `in progress` / `completed` |
+| `progress`      | Number                               | 0–100                                           |
+| `wishCreatedAt` | Datetime                             | device time (NOT Autodate)                      |
+| `wishUpdatedAt` | Datetime                             | drives last-write-wins (NOT Autodate)           |
+| `wishDeletedAt` | Datetime                             | empty = live; set = soft-delete tombstone       |
 
 Important:
 
@@ -137,6 +137,29 @@ and Delete all to:
 ```
 
 This scopes every operation so each user only sees/edits their own Wishes.
+
+### `wish_images` (new Base collection — for image sync)
+
+Only needed if you want attached images to sync. Create a Base collection named
+`wish_images` with these fields:
+
+| field          | type                                 | notes                                     |
+| -------------- | ------------------------------------ | ----------------------------------------- |
+| `owner`        | Relation → `users`, single, required | the signed-in user                        |
+| `imageId`      | Plain text                           | stable image UUID (sync identity)         |
+| `wishId`       | Plain text                           | the owning Wish's UUID                    |
+| `file`         | **File** (single, images)            | the image bytes (Option A storage)        |
+| `mimeType`     | Plain text                           | e.g. `image/jpeg`                         |
+| `position`     | Number                               | display order                             |
+| `imgCreatedAt` | Datetime                             | device creation time                      |
+| `imgDeletedAt` | Datetime                             | empty = live; set = soft-delete tombstone |
+
+Set the same API rules as `wishes` (all five to
+`@request.auth.id != "" && owner = @request.auth.id`).
+
+Images are stored on the PocketBase server's disk by default. To put them on
+S3-compatible storage (AWS S3, Cloudflare R2, etc.) instead, configure
+**Settings → Files storage** in the PocketBase admin UI — no app change needed.
 
 ---
 

@@ -42,6 +42,7 @@ import 'package:go_router/go_router.dart';
 import '../../application/application.dart';
 import '../../domain/domain.dart';
 import '../router/app_router.dart';
+import 'wish_image_gallery.dart';
 
 /// Resolves the display name for a category id (R9.5).
 ///
@@ -83,7 +84,7 @@ class WishDetailView extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          seq == null ? 'Wish' : 'Wish #$seq',
+          seq == null ? 'Wishlist' : 'Wishlist #$seq',
           style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
         ),
         actions: <Widget>[
@@ -142,7 +143,7 @@ class WishDetailView extends ConsumerWidget {
     final bool confirmed = await showDialog<bool>(
           context: context,
           builder: (BuildContext context) => AlertDialog(
-            title: const Text('Delete Wish?'),
+            title: const Text('Delete wishlist?'),
             content: Text(
               'Delete "${request.title}"? This cannot be undone.',
             ),
@@ -203,6 +204,10 @@ class _WishDetailBody extends ConsumerWidget {
             ),
           ],
         ),
+        const SizedBox(height: 24),
+
+        // Attached images (gallery with add/remove).
+        WishImageGallery(wishId: wish.id),
         const SizedBox(height: 24),
 
         // Description (R9.5) — may be absent.
@@ -496,7 +501,7 @@ class _NotFound extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'This Wish is no longer available.',
+              'This wishlist is no longer available.',
               textAlign: TextAlign.center,
               style: theme.textTheme.titleMedium,
             ),
@@ -525,7 +530,7 @@ class _DetailError extends StatelessWidget {
             Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
             const SizedBox(height: 16),
             Text(
-              'Something went wrong loading this Wish.',
+              'Something went wrong loading this wishlist.',
               textAlign: TextAlign.center,
               style: theme.textTheme.titleMedium,
             ),

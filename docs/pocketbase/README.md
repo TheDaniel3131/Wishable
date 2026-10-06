@@ -77,6 +77,19 @@ Wishes.
 A unique index on (`owner`, `wishId`) is recommended to prevent duplicate
 records for the same Wish (optional but tidy).
 
+### `wish_images` (optional — for image sync)
+
+If you want attached images to sync across devices, create a Base collection
+`wish_images` with: `owner` (Relation → users, required), `imageId` (text),
+`wishId` (text), `file` (File field, single, image types), `mimeType` (text),
+`position` (number), `imgCreatedAt` (Datetime), `imgDeletedAt` (Datetime,
+nullable tombstone). Set all five API rules to
+`@request.auth.id != "" && owner = @request.auth.id`.
+
+Images are kept in PocketBase's own file storage (Option A). To offload them to
+S3-compatible storage (AWS S3 / Cloudflare R2 / MinIO), flip the **Settings →
+Files storage** toggle in the admin UI — the app code is unchanged.
+
 ### OAuth (optional — skip for now)
 
 Email + password alone is enough. The app shows OAuth buttons, but you can

@@ -65,6 +65,31 @@ class Categories extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// Images attached to a Wish.
+///
+/// Images are cached locally as raw [bytes] so they render offline and on every
+/// platform (including web, where `dart:io`/path_provider are unavailable). A
+/// Wish may have zero or more images, ordered by [position]. [remoteName] holds
+/// the PocketBase stored filename once uploaded (null = pending sync), and
+/// [deletedAtUtc] is a soft-delete tombstone mirroring the Wishes convention so
+/// a delete propagates through sync. Added in schema v4.
+@DataClassName('WishImageRow')
+class WishImages extends Table {
+  TextColumn get id => text()(); // UUID PK
+  TextColumn get wishId => text().customConstraint(
+        'NOT NULL REFERENCES wishes(id) ON DELETE CASCADE',
+      )(); // FK -> Wish; cascade so deleting a Wish removes its images
+  BlobColumn get bytes => blob()(); // raw image data (local cache)
+  TextColumn get mimeType => text()(); // e.g. image/jpeg
+  IntColumn get position => integer().withDefault(const Constant(0))();
+  DateTimeColumn get createdAtUtc => dateTime()();
+  TextColumn get remoteName => text().nullable()(); // PocketBase filename
+  DateTimeColumn get deletedAtUtc => dateTime().nullable()(); // tombstone
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 /// Simple key/value application settings (R10.1).
 @DataClassName('SettingRow')
 class Settings extends Table {

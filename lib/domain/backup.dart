@@ -53,15 +53,40 @@ final class ExportTarget {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ExportTarget &&
-          other.path == path &&
-          other.format == format;
+      other is ExportTarget && other.path == path && other.format == format;
 
   @override
   int get hashCode => Object.hash(path, format);
 
   @override
   String toString() => 'ExportTarget(path: $path, format: $format)';
+}
+
+/// Exported backup content produced in memory, ready for the presentation
+/// layer to deliver however the platform allows (write to a chosen path on
+/// desktop/mobile, or trigger a browser download on web).
+///
+/// Keeping the bytes platform-neutral lets export work everywhere — including
+/// web, where `dart:io` file writing is unavailable.
+final class BackupBytes {
+  const BackupBytes({
+    required this.bytes,
+    required this.format,
+    required this.suggestedFileName,
+    required this.wishCount,
+  });
+
+  /// The exported content.
+  final List<int> bytes;
+
+  /// The format of [bytes].
+  final BackupFormat format;
+
+  /// A sensible default file name (with extension) for a save dialog/download.
+  final String suggestedFileName;
+
+  /// Number of Wishes captured in the export snapshot.
+  final int wishCount;
 }
 
 /// The outcome of a successful export (R11.1–R11.3).
@@ -150,9 +175,7 @@ final class ImportFile {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ImportFile &&
-          other.path == path &&
-          other.format == format;
+      other is ImportFile && other.path == path && other.format == format;
 
   @override
   int get hashCode => Object.hash(path, format);

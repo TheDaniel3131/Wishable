@@ -25,7 +25,7 @@ const List<String> kPresetCategoryNames = <String>[
   'Achieve',
 ];
 
-@DriftDatabase(tables: [Wishes, Categories, Settings])
+@DriftDatabase(tables: [Wishes, Categories, Settings, WishImages])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(openConnection());
 
@@ -34,7 +34,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forExecutor(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -56,6 +56,11 @@ class AppDatabase extends _$AppDatabase {
             // numbers. Append-only and data-preserving.
             await m.addColumn(wishes, wishes.seq);
             await _backfillSeq();
+          }
+          if (from < 4) {
+            // v3 -> v4: add the WishImages table for attached images. New table
+            // only — existing data is untouched.
+            await m.createTable(wishImages);
           }
         },
         beforeOpen: (details) async {

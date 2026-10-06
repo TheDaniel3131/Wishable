@@ -63,6 +63,15 @@ final Provider<CategoryRepository> categoryRepositoryProvider =
   name: 'categoryRepositoryProvider',
 );
 
+/// Provides the [WishImageRepository], backed by [DriftWishImageRepository]
+/// over the shared [AppDatabase]. Typed as the interface so consumers never
+/// see Drift (R14.3).
+final Provider<WishImageRepository> wishImageRepositoryProvider =
+    Provider<WishImageRepository>(
+  (Ref ref) => DriftWishImageRepository(ref.watch(appDatabaseProvider)),
+  name: 'wishImageRepositoryProvider',
+);
+
 /// Provides the [SettingsRepository], backed by [DriftSettingsRepository] over
 /// the shared [AppDatabase]. Typed as the interface so consumers never see
 /// Drift (R14.3).

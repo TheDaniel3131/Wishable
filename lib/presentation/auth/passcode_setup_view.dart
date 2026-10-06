@@ -215,6 +215,14 @@ class _ManageFormState extends ConsumerState<_ManageForm> {
             await widget.onChanged();
           },
         ),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.timer_outlined),
+          title: const Text('Auto-lock'),
+          subtitle: Text(_autoLockLabel(widget.credentials.lockTimeout)),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => _showAutoLockPicker(context),
+        ),
         const Divider(),
         ListTile(
           contentPadding: EdgeInsets.zero,
@@ -230,6 +238,118 @@ class _ManageFormState extends ConsumerState<_ManageForm> {
         ),
       ],
     );
+  }
+
+  /// A human label for the current auto-lock [timeout]. A negative duration is
+  /// the "Never" sentinel; zero means lock immediately on leaving the app.
+  static String _autoLockLabel(Duration timeout) {
+    if (timeout.isNegative) return 'Never';
+    if (timeout == Duration.zero) return 'Immediately';
+    if (timeout.inMinutes < 1) return '${timeout.inSeconds} seconds';
+    if (timeout.inMinutes == 1) return 'After 1 minute';
+    return 'After ${timeout.inMinutes} minutes';
+  }
+
+  /// Preset auto-lock options shown in the picker. "Never" is stored as a
+  /// negative sentinel; "Immediately" as zero.
+  static const List<(String, Duration)> _autoLockPresets = <(String, Duration)>[
+    ('Immediately', Duration.zero),
+    ('After 1 minute', Duration(minutes: 1)),
+    ('After 5 minutes', Duration(minutes: 5)),
+    ('After 15 minutes', Duration(minutes: 15)),
+    ('After 30 minutes', Duration(minutes: 30)),
+    ('Never', Duration(seconds: -1)),
+  ];
+
+  Future<void> _showAutoLockPicker(BuildContext context) async {
+    final Duration current = widget.credentials.lockTimeout;
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (BuildContext sheetCtx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                child: Text('Lock the app after…',
+                    style: Theme.of(sheetCtx).textTheme.titleMedium),
+              ),
+              for (final (String label, Duration value) in _autoLockPresets)
+                ListTile(
+                  title: Text(label),
+                  trailing: value == current
+                      ? Icon(Icons.check,
+                          color: Theme.of(sheetCtx).colorScheme.primary)
+                      : null,
+                  onTap: () async {
+                    Navigator.of(sheetCtx).pop();
+                    await _applyTimeout(value);
+                  },
+                ),
+              ListTile(
+                leading: const Icon(Icons.edit_outlined),
+                title: const Text('Custom…'),
+                onTap: () {
+                  Navigator.of(sheetCtx).pop();
+                  _showCustomMinutesDialog(context);
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showCustomMinutesDialog(BuildContext context) async {
+    final TextEditingController minutes = TextEditingController();
+    String? error;
+    await showDialog<void>(
+      context: context,
+      builder: (BuildContext ctx) => StatefulBuilder(
+        builder: (BuildContext ctx, void Function(void Function()) setLocal) {
+          return AlertDialog(
+            title: const Text('Custom auto-lock'),
+            content: TextField(
+              controller: minutes,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Minutes',
+                hintText: 'e.g. 10',
+                errorText: error,
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () async {
+                  final int? m = int.tryParse(minutes.text.trim());
+                  if (m == null || m < 0 || m > 1440) {
+                    setLocal(() => error = 'Enter 0–1440 minutes.');
+                    return;
+                  }
+                  Navigator.of(ctx).pop();
+                  await _applyTimeout(Duration(minutes: m));
+                },
+                child: const Text('Set'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _applyTimeout(Duration timeout) async {
+    await ref.read(authControllerProvider.notifier).setLockTimeout(timeout);
+    await widget.onChanged();
   }
 
   Future<void> _showChangeDialog(BuildContext context) async {

@@ -14,5 +14,6 @@ export 'controllers/backup_controller.dart';
 export 'controllers/celebration_controller.dart';
 export 'controllers/wish_action_controller.dart';
 export 'controllers/wish_edit_controller.dart';
+export 'controllers/wish_image_controller.dart';
 export 'controllers/wish_list_controller.dart';
 export 'providers.dart';

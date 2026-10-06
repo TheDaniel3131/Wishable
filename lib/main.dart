@@ -44,10 +44,13 @@ class WishableApp extends ConsumerWidget {
       themeMode: ThemeMode.system,
       routerConfig: router,
       // On launch, show the branded splash briefly while startup settles, then
-      // crossfade into the app. The app lock gate (Option A) withholds the Wish
-      // UI while locked (R2.1); the celebration overlay (R7) sits inside it.
+      // crossfade into the app. [AutoLockObserver] only re-locks the app state
+      // after it has been backgrounded past the configured timeout — it never
+      // withholds the UI, so tab switches never re-prompt. The passcode is
+      // enforced only on sensitive screens (wrapped in a LockGuard). The
+      // celebration overlay (R7) floats above every route.
       builder: (BuildContext context, Widget? child) => _StartupGate(
-        child: AuthGate(
+        child: AutoLockObserver(
           child: CelebrationListener(child: child ?? const SizedBox.shrink()),
         ),
       ),

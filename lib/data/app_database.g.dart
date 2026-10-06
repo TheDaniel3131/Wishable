@@ -1007,18 +1007,473 @@ class SettingsCompanion extends UpdateCompanion<SettingRow> {
   }
 }
 
+class $WishImagesTable extends WishImages
+    with TableInfo<$WishImagesTable, WishImageRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $WishImagesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _wishIdMeta = const VerificationMeta('wishId');
+  @override
+  late final GeneratedColumn<String> wishId = GeneratedColumn<String>(
+      'wish_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL REFERENCES wishes(id) ON DELETE CASCADE');
+  static const VerificationMeta _bytesMeta = const VerificationMeta('bytes');
+  @override
+  late final GeneratedColumn<Uint8List> bytes = GeneratedColumn<Uint8List>(
+      'bytes', aliasedName, false,
+      type: DriftSqlType.blob, requiredDuringInsert: true);
+  static const VerificationMeta _mimeTypeMeta =
+      const VerificationMeta('mimeType');
+  @override
+  late final GeneratedColumn<String> mimeType = GeneratedColumn<String>(
+      'mime_type', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _positionMeta =
+      const VerificationMeta('position');
+  @override
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+      'position', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _createdAtUtcMeta =
+      const VerificationMeta('createdAtUtc');
+  @override
+  late final GeneratedColumn<DateTime> createdAtUtc = GeneratedColumn<DateTime>(
+      'created_at_utc', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _remoteNameMeta =
+      const VerificationMeta('remoteName');
+  @override
+  late final GeneratedColumn<String> remoteName = GeneratedColumn<String>(
+      'remote_name', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _deletedAtUtcMeta =
+      const VerificationMeta('deletedAtUtc');
+  @override
+  late final GeneratedColumn<DateTime> deletedAtUtc = GeneratedColumn<DateTime>(
+      'deleted_at_utc', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        wishId,
+        bytes,
+        mimeType,
+        position,
+        createdAtUtc,
+        remoteName,
+        deletedAtUtc
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'wish_images';
+  @override
+  VerificationContext validateIntegrity(Insertable<WishImageRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('wish_id')) {
+      context.handle(_wishIdMeta,
+          wishId.isAcceptableOrUnknown(data['wish_id']!, _wishIdMeta));
+    } else if (isInserting) {
+      context.missing(_wishIdMeta);
+    }
+    if (data.containsKey('bytes')) {
+      context.handle(
+          _bytesMeta, bytes.isAcceptableOrUnknown(data['bytes']!, _bytesMeta));
+    } else if (isInserting) {
+      context.missing(_bytesMeta);
+    }
+    if (data.containsKey('mime_type')) {
+      context.handle(_mimeTypeMeta,
+          mimeType.isAcceptableOrUnknown(data['mime_type']!, _mimeTypeMeta));
+    } else if (isInserting) {
+      context.missing(_mimeTypeMeta);
+    }
+    if (data.containsKey('position')) {
+      context.handle(_positionMeta,
+          position.isAcceptableOrUnknown(data['position']!, _positionMeta));
+    }
+    if (data.containsKey('created_at_utc')) {
+      context.handle(
+          _createdAtUtcMeta,
+          createdAtUtc.isAcceptableOrUnknown(
+              data['created_at_utc']!, _createdAtUtcMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtUtcMeta);
+    }
+    if (data.containsKey('remote_name')) {
+      context.handle(
+          _remoteNameMeta,
+          remoteName.isAcceptableOrUnknown(
+              data['remote_name']!, _remoteNameMeta));
+    }
+    if (data.containsKey('deleted_at_utc')) {
+      context.handle(
+          _deletedAtUtcMeta,
+          deletedAtUtc.isAcceptableOrUnknown(
+              data['deleted_at_utc']!, _deletedAtUtcMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  WishImageRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return WishImageRow(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      wishId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}wish_id'])!,
+      bytes: attachedDatabase.typeMapping
+          .read(DriftSqlType.blob, data['${effectivePrefix}bytes'])!,
+      mimeType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}mime_type'])!,
+      position: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}position'])!,
+      createdAtUtc: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}created_at_utc'])!,
+      remoteName: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}remote_name']),
+      deletedAtUtc: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}deleted_at_utc']),
+    );
+  }
+
+  @override
+  $WishImagesTable createAlias(String alias) {
+    return $WishImagesTable(attachedDatabase, alias);
+  }
+}
+
+class WishImageRow extends DataClass implements Insertable<WishImageRow> {
+  final String id;
+  final String wishId;
+  final Uint8List bytes;
+  final String mimeType;
+  final int position;
+  final DateTime createdAtUtc;
+  final String? remoteName;
+  final DateTime? deletedAtUtc;
+  const WishImageRow(
+      {required this.id,
+      required this.wishId,
+      required this.bytes,
+      required this.mimeType,
+      required this.position,
+      required this.createdAtUtc,
+      this.remoteName,
+      this.deletedAtUtc});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['wish_id'] = Variable<String>(wishId);
+    map['bytes'] = Variable<Uint8List>(bytes);
+    map['mime_type'] = Variable<String>(mimeType);
+    map['position'] = Variable<int>(position);
+    map['created_at_utc'] = Variable<DateTime>(createdAtUtc);
+    if (!nullToAbsent || remoteName != null) {
+      map['remote_name'] = Variable<String>(remoteName);
+    }
+    if (!nullToAbsent || deletedAtUtc != null) {
+      map['deleted_at_utc'] = Variable<DateTime>(deletedAtUtc);
+    }
+    return map;
+  }
+
+  WishImagesCompanion toCompanion(bool nullToAbsent) {
+    return WishImagesCompanion(
+      id: Value(id),
+      wishId: Value(wishId),
+      bytes: Value(bytes),
+      mimeType: Value(mimeType),
+      position: Value(position),
+      createdAtUtc: Value(createdAtUtc),
+      remoteName: remoteName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remoteName),
+      deletedAtUtc: deletedAtUtc == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAtUtc),
+    );
+  }
+
+  factory WishImageRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return WishImageRow(
+      id: serializer.fromJson<String>(json['id']),
+      wishId: serializer.fromJson<String>(json['wishId']),
+      bytes: serializer.fromJson<Uint8List>(json['bytes']),
+      mimeType: serializer.fromJson<String>(json['mimeType']),
+      position: serializer.fromJson<int>(json['position']),
+      createdAtUtc: serializer.fromJson<DateTime>(json['createdAtUtc']),
+      remoteName: serializer.fromJson<String?>(json['remoteName']),
+      deletedAtUtc: serializer.fromJson<DateTime?>(json['deletedAtUtc']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'wishId': serializer.toJson<String>(wishId),
+      'bytes': serializer.toJson<Uint8List>(bytes),
+      'mimeType': serializer.toJson<String>(mimeType),
+      'position': serializer.toJson<int>(position),
+      'createdAtUtc': serializer.toJson<DateTime>(createdAtUtc),
+      'remoteName': serializer.toJson<String?>(remoteName),
+      'deletedAtUtc': serializer.toJson<DateTime?>(deletedAtUtc),
+    };
+  }
+
+  WishImageRow copyWith(
+          {String? id,
+          String? wishId,
+          Uint8List? bytes,
+          String? mimeType,
+          int? position,
+          DateTime? createdAtUtc,
+          Value<String?> remoteName = const Value.absent(),
+          Value<DateTime?> deletedAtUtc = const Value.absent()}) =>
+      WishImageRow(
+        id: id ?? this.id,
+        wishId: wishId ?? this.wishId,
+        bytes: bytes ?? this.bytes,
+        mimeType: mimeType ?? this.mimeType,
+        position: position ?? this.position,
+        createdAtUtc: createdAtUtc ?? this.createdAtUtc,
+        remoteName: remoteName.present ? remoteName.value : this.remoteName,
+        deletedAtUtc:
+            deletedAtUtc.present ? deletedAtUtc.value : this.deletedAtUtc,
+      );
+  WishImageRow copyWithCompanion(WishImagesCompanion data) {
+    return WishImageRow(
+      id: data.id.present ? data.id.value : this.id,
+      wishId: data.wishId.present ? data.wishId.value : this.wishId,
+      bytes: data.bytes.present ? data.bytes.value : this.bytes,
+      mimeType: data.mimeType.present ? data.mimeType.value : this.mimeType,
+      position: data.position.present ? data.position.value : this.position,
+      createdAtUtc: data.createdAtUtc.present
+          ? data.createdAtUtc.value
+          : this.createdAtUtc,
+      remoteName:
+          data.remoteName.present ? data.remoteName.value : this.remoteName,
+      deletedAtUtc: data.deletedAtUtc.present
+          ? data.deletedAtUtc.value
+          : this.deletedAtUtc,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WishImageRow(')
+          ..write('id: $id, ')
+          ..write('wishId: $wishId, ')
+          ..write('bytes: $bytes, ')
+          ..write('mimeType: $mimeType, ')
+          ..write('position: $position, ')
+          ..write('createdAtUtc: $createdAtUtc, ')
+          ..write('remoteName: $remoteName, ')
+          ..write('deletedAtUtc: $deletedAtUtc')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, wishId, $driftBlobEquality.hash(bytes),
+      mimeType, position, createdAtUtc, remoteName, deletedAtUtc);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is WishImageRow &&
+          other.id == this.id &&
+          other.wishId == this.wishId &&
+          $driftBlobEquality.equals(other.bytes, this.bytes) &&
+          other.mimeType == this.mimeType &&
+          other.position == this.position &&
+          other.createdAtUtc == this.createdAtUtc &&
+          other.remoteName == this.remoteName &&
+          other.deletedAtUtc == this.deletedAtUtc);
+}
+
+class WishImagesCompanion extends UpdateCompanion<WishImageRow> {
+  final Value<String> id;
+  final Value<String> wishId;
+  final Value<Uint8List> bytes;
+  final Value<String> mimeType;
+  final Value<int> position;
+  final Value<DateTime> createdAtUtc;
+  final Value<String?> remoteName;
+  final Value<DateTime?> deletedAtUtc;
+  final Value<int> rowid;
+  const WishImagesCompanion({
+    this.id = const Value.absent(),
+    this.wishId = const Value.absent(),
+    this.bytes = const Value.absent(),
+    this.mimeType = const Value.absent(),
+    this.position = const Value.absent(),
+    this.createdAtUtc = const Value.absent(),
+    this.remoteName = const Value.absent(),
+    this.deletedAtUtc = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  WishImagesCompanion.insert({
+    required String id,
+    required String wishId,
+    required Uint8List bytes,
+    required String mimeType,
+    this.position = const Value.absent(),
+    required DateTime createdAtUtc,
+    this.remoteName = const Value.absent(),
+    this.deletedAtUtc = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        wishId = Value(wishId),
+        bytes = Value(bytes),
+        mimeType = Value(mimeType),
+        createdAtUtc = Value(createdAtUtc);
+  static Insertable<WishImageRow> custom({
+    Expression<String>? id,
+    Expression<String>? wishId,
+    Expression<Uint8List>? bytes,
+    Expression<String>? mimeType,
+    Expression<int>? position,
+    Expression<DateTime>? createdAtUtc,
+    Expression<String>? remoteName,
+    Expression<DateTime>? deletedAtUtc,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (wishId != null) 'wish_id': wishId,
+      if (bytes != null) 'bytes': bytes,
+      if (mimeType != null) 'mime_type': mimeType,
+      if (position != null) 'position': position,
+      if (createdAtUtc != null) 'created_at_utc': createdAtUtc,
+      if (remoteName != null) 'remote_name': remoteName,
+      if (deletedAtUtc != null) 'deleted_at_utc': deletedAtUtc,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  WishImagesCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? wishId,
+      Value<Uint8List>? bytes,
+      Value<String>? mimeType,
+      Value<int>? position,
+      Value<DateTime>? createdAtUtc,
+      Value<String?>? remoteName,
+      Value<DateTime?>? deletedAtUtc,
+      Value<int>? rowid}) {
+    return WishImagesCompanion(
+      id: id ?? this.id,
+      wishId: wishId ?? this.wishId,
+      bytes: bytes ?? this.bytes,
+      mimeType: mimeType ?? this.mimeType,
+      position: position ?? this.position,
+      createdAtUtc: createdAtUtc ?? this.createdAtUtc,
+      remoteName: remoteName ?? this.remoteName,
+      deletedAtUtc: deletedAtUtc ?? this.deletedAtUtc,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (wishId.present) {
+      map['wish_id'] = Variable<String>(wishId.value);
+    }
+    if (bytes.present) {
+      map['bytes'] = Variable<Uint8List>(bytes.value);
+    }
+    if (mimeType.present) {
+      map['mime_type'] = Variable<String>(mimeType.value);
+    }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
+    if (createdAtUtc.present) {
+      map['created_at_utc'] = Variable<DateTime>(createdAtUtc.value);
+    }
+    if (remoteName.present) {
+      map['remote_name'] = Variable<String>(remoteName.value);
+    }
+    if (deletedAtUtc.present) {
+      map['deleted_at_utc'] = Variable<DateTime>(deletedAtUtc.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WishImagesCompanion(')
+          ..write('id: $id, ')
+          ..write('wishId: $wishId, ')
+          ..write('bytes: $bytes, ')
+          ..write('mimeType: $mimeType, ')
+          ..write('position: $position, ')
+          ..write('createdAtUtc: $createdAtUtc, ')
+          ..write('remoteName: $remoteName, ')
+          ..write('deletedAtUtc: $deletedAtUtc, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $CategoriesTable categories = $CategoriesTable(this);
   late final $WishesTable wishes = $WishesTable(this);
   late final $SettingsTable settings = $SettingsTable(this);
+  late final $WishImagesTable wishImages = $WishImagesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [categories, wishes, settings];
+      [categories, wishes, settings, wishImages];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
+        [
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('wishes',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('wish_images', kind: UpdateKind.delete),
+            ],
+          ),
+        ],
+      );
 }
 
 typedef $$CategoriesTableCreateCompanionBuilder = CategoriesCompanion Function({
@@ -1291,6 +1746,20 @@ final class $$WishesTableReferences
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: [item]));
   }
+
+  static MultiTypedResultKey<$WishImagesTable, List<WishImageRow>>
+      _wishImagesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+          db.wishImages,
+          aliasName: $_aliasNameGenerator(db.wishes.id, db.wishImages.wishId));
+
+  $$WishImagesTableProcessedTableManager get wishImagesRefs {
+    final manager = $$WishImagesTableTableManager($_db, $_db.wishImages)
+        .filter((f) => f.wishId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_wishImagesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
 }
 
 class $$WishesTableFilterComposer
@@ -1354,6 +1823,27 @@ class $$WishesTableFilterComposer
                   $removeJoinBuilderFromRootComposer,
             ));
     return composer;
+  }
+
+  Expression<bool> wishImagesRefs(
+      Expression<bool> Function($$WishImagesTableFilterComposer f) f) {
+    final $$WishImagesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.wishImages,
+        getReferencedColumn: (t) => t.wishId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WishImagesTableFilterComposer(
+              $db: $db,
+              $table: $db.wishImages,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
   }
 }
 
@@ -1478,6 +1968,27 @@ class $$WishesTableAnnotationComposer
             ));
     return composer;
   }
+
+  Expression<T> wishImagesRefs<T extends Object>(
+      Expression<T> Function($$WishImagesTableAnnotationComposer a) f) {
+    final $$WishImagesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.wishImages,
+        getReferencedColumn: (t) => t.wishId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WishImagesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.wishImages,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$WishesTableTableManager extends RootTableManager<
@@ -1491,7 +2002,7 @@ class $$WishesTableTableManager extends RootTableManager<
     $$WishesTableUpdateCompanionBuilder,
     (WishRow, $$WishesTableReferences),
     WishRow,
-    PrefetchHooks Function({bool categoryId})> {
+    PrefetchHooks Function({bool categoryId, bool wishImagesRefs})> {
   $$WishesTableTableManager(_$AppDatabase db, $WishesTable table)
       : super(TableManagerState(
           db: db,
@@ -1562,10 +2073,11 @@ class $$WishesTableTableManager extends RootTableManager<
               .map((e) =>
                   (e.readTable(table), $$WishesTableReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({categoryId = false}) {
+          prefetchHooksCallback: (
+              {categoryId = false, wishImagesRefs = false}) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [],
+              explicitlyWatchedTables: [if (wishImagesRefs) db.wishImages],
               addJoins: <
                   T extends TableManagerState<
                       dynamic,
@@ -1593,7 +2105,21 @@ class $$WishesTableTableManager extends RootTableManager<
                 return state;
               },
               getPrefetchedDataCallback: (items) async {
-                return [];
+                return [
+                  if (wishImagesRefs)
+                    await $_getPrefetchedData<WishRow, $WishesTable,
+                            WishImageRow>(
+                        currentTable: table,
+                        referencedTable:
+                            $$WishesTableReferences._wishImagesRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$WishesTableReferences(db, table, p0)
+                                .wishImagesRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.wishId == item.id),
+                        typedResults: items)
+                ];
               },
             );
           },
@@ -1611,7 +2137,7 @@ typedef $$WishesTableProcessedTableManager = ProcessedTableManager<
     $$WishesTableUpdateCompanionBuilder,
     (WishRow, $$WishesTableReferences),
     WishRow,
-    PrefetchHooks Function({bool categoryId})>;
+    PrefetchHooks Function({bool categoryId, bool wishImagesRefs})>;
 typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
   required String key,
   required String value,
@@ -1732,6 +2258,325 @@ typedef $$SettingsTableProcessedTableManager = ProcessedTableManager<
     (SettingRow, BaseReferences<_$AppDatabase, $SettingsTable, SettingRow>),
     SettingRow,
     PrefetchHooks Function()>;
+typedef $$WishImagesTableCreateCompanionBuilder = WishImagesCompanion Function({
+  required String id,
+  required String wishId,
+  required Uint8List bytes,
+  required String mimeType,
+  Value<int> position,
+  required DateTime createdAtUtc,
+  Value<String?> remoteName,
+  Value<DateTime?> deletedAtUtc,
+  Value<int> rowid,
+});
+typedef $$WishImagesTableUpdateCompanionBuilder = WishImagesCompanion Function({
+  Value<String> id,
+  Value<String> wishId,
+  Value<Uint8List> bytes,
+  Value<String> mimeType,
+  Value<int> position,
+  Value<DateTime> createdAtUtc,
+  Value<String?> remoteName,
+  Value<DateTime?> deletedAtUtc,
+  Value<int> rowid,
+});
+
+final class $$WishImagesTableReferences
+    extends BaseReferences<_$AppDatabase, $WishImagesTable, WishImageRow> {
+  $$WishImagesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $WishesTable _wishIdTable(_$AppDatabase db) => db.wishes
+      .createAlias($_aliasNameGenerator(db.wishImages.wishId, db.wishes.id));
+
+  $$WishesTableProcessedTableManager get wishId {
+    final $_column = $_itemColumn<String>('wish_id')!;
+
+    final manager = $$WishesTableTableManager($_db, $_db.wishes)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_wishIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$WishImagesTableFilterComposer
+    extends Composer<_$AppDatabase, $WishImagesTable> {
+  $$WishImagesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<Uint8List> get bytes => $composableBuilder(
+      column: $table.bytes, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get mimeType => $composableBuilder(
+      column: $table.mimeType, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get position => $composableBuilder(
+      column: $table.position, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAtUtc => $composableBuilder(
+      column: $table.createdAtUtc, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get remoteName => $composableBuilder(
+      column: $table.remoteName, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deletedAtUtc => $composableBuilder(
+      column: $table.deletedAtUtc, builder: (column) => ColumnFilters(column));
+
+  $$WishesTableFilterComposer get wishId {
+    final $$WishesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.wishId,
+        referencedTable: $db.wishes,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WishesTableFilterComposer(
+              $db: $db,
+              $table: $db.wishes,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$WishImagesTableOrderingComposer
+    extends Composer<_$AppDatabase, $WishImagesTable> {
+  $$WishImagesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<Uint8List> get bytes => $composableBuilder(
+      column: $table.bytes, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get mimeType => $composableBuilder(
+      column: $table.mimeType, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get position => $composableBuilder(
+      column: $table.position, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAtUtc => $composableBuilder(
+      column: $table.createdAtUtc,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get remoteName => $composableBuilder(
+      column: $table.remoteName, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deletedAtUtc => $composableBuilder(
+      column: $table.deletedAtUtc,
+      builder: (column) => ColumnOrderings(column));
+
+  $$WishesTableOrderingComposer get wishId {
+    final $$WishesTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.wishId,
+        referencedTable: $db.wishes,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WishesTableOrderingComposer(
+              $db: $db,
+              $table: $db.wishes,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$WishImagesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $WishImagesTable> {
+  $$WishImagesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<Uint8List> get bytes =>
+      $composableBuilder(column: $table.bytes, builder: (column) => column);
+
+  GeneratedColumn<String> get mimeType =>
+      $composableBuilder(column: $table.mimeType, builder: (column) => column);
+
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAtUtc => $composableBuilder(
+      column: $table.createdAtUtc, builder: (column) => column);
+
+  GeneratedColumn<String> get remoteName => $composableBuilder(
+      column: $table.remoteName, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAtUtc => $composableBuilder(
+      column: $table.deletedAtUtc, builder: (column) => column);
+
+  $$WishesTableAnnotationComposer get wishId {
+    final $$WishesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.wishId,
+        referencedTable: $db.wishes,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WishesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.wishes,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$WishImagesTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $WishImagesTable,
+    WishImageRow,
+    $$WishImagesTableFilterComposer,
+    $$WishImagesTableOrderingComposer,
+    $$WishImagesTableAnnotationComposer,
+    $$WishImagesTableCreateCompanionBuilder,
+    $$WishImagesTableUpdateCompanionBuilder,
+    (WishImageRow, $$WishImagesTableReferences),
+    WishImageRow,
+    PrefetchHooks Function({bool wishId})> {
+  $$WishImagesTableTableManager(_$AppDatabase db, $WishImagesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$WishImagesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$WishImagesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$WishImagesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> wishId = const Value.absent(),
+            Value<Uint8List> bytes = const Value.absent(),
+            Value<String> mimeType = const Value.absent(),
+            Value<int> position = const Value.absent(),
+            Value<DateTime> createdAtUtc = const Value.absent(),
+            Value<String?> remoteName = const Value.absent(),
+            Value<DateTime?> deletedAtUtc = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              WishImagesCompanion(
+            id: id,
+            wishId: wishId,
+            bytes: bytes,
+            mimeType: mimeType,
+            position: position,
+            createdAtUtc: createdAtUtc,
+            remoteName: remoteName,
+            deletedAtUtc: deletedAtUtc,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String wishId,
+            required Uint8List bytes,
+            required String mimeType,
+            Value<int> position = const Value.absent(),
+            required DateTime createdAtUtc,
+            Value<String?> remoteName = const Value.absent(),
+            Value<DateTime?> deletedAtUtc = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              WishImagesCompanion.insert(
+            id: id,
+            wishId: wishId,
+            bytes: bytes,
+            mimeType: mimeType,
+            position: position,
+            createdAtUtc: createdAtUtc,
+            remoteName: remoteName,
+            deletedAtUtc: deletedAtUtc,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$WishImagesTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({wishId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (wishId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.wishId,
+                    referencedTable:
+                        $$WishImagesTableReferences._wishIdTable(db),
+                    referencedColumn:
+                        $$WishImagesTableReferences._wishIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$WishImagesTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $WishImagesTable,
+    WishImageRow,
+    $$WishImagesTableFilterComposer,
+    $$WishImagesTableOrderingComposer,
+    $$WishImagesTableAnnotationComposer,
+    $$WishImagesTableCreateCompanionBuilder,
+    $$WishImagesTableUpdateCompanionBuilder,
+    (WishImageRow, $$WishImagesTableReferences),
+    WishImageRow,
+    PrefetchHooks Function({bool wishId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1742,4 +2587,6 @@ class $AppDatabaseManager {
       $$WishesTableTableManager(_db, _db.wishes);
   $$SettingsTableTableManager get settings =>
       $$SettingsTableTableManager(_db, _db.settings);
+  $$WishImagesTableTableManager get wishImages =>
+      $$WishImagesTableTableManager(_db, _db.wishImages);
 }

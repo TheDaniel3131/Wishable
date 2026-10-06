@@ -184,4 +184,8 @@ class _FakeBackupService implements BackupService {
   @override
   Future<ExportResult> exportCsv(ExportTarget t) =>
       throw UnimplementedError('export is not exercised by this test');
+
+  @override
+  Future<BackupBytes> exportToBytes(BackupFormat format) =>
+      throw UnimplementedError('export is not exercised by this test');
 }

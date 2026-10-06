@@ -1,18 +1,19 @@
-/// [AuthGate] — wraps the app and withholds content while locked (auth spec,
-/// Option A — R2.1, R6).
+/// App-lock widgets (auth spec, Option A — redesigned).
 ///
-/// Installed in `main.dart` around the router so it is orthogonal to the route
-/// graph: no routes change to protect content. It watches [authControllerProvider]:
+/// The lock no longer gates the WHOLE app. Instead:
 ///
-///   - [AuthUnconfigured] / [AuthUnlocked] -> render the app ([child]).
-///   - [AuthLocked] / [AuthCoolingDown]    -> render the [LockScreen] and NEVER
-///     build the Wish UI (R2.1).
+///   - [AutoLockObserver] sits invisibly at the app root. It only watches app
+///     lifecycle and flips the lock STATE back to locked when the app has been
+///     backgrounded longer than the configured auto-lock timeout. It renders
+///     its [child] unchanged — it never withholds the UI, so switching tabs
+///     never re-prompts for the passcode.
+///   - [LockGuard] wraps a single SENSITIVE screen (e.g. Account & sync). It
+///     requires the app to be unlocked before showing its [child]; while the
+///     app is locked it shows the [LockScreen]. Non-sensitive screens are not
+///     wrapped and are always visible.
 ///
-/// It also owns the auto-lock behavior (R6): a [WidgetsBindingObserver] watches
-/// app lifecycle; when the app is paused/inactive beyond the configured
-/// `lockTimeout`, it re-locks on resume. Cold start is already locked because
-/// the controller initializes to [AuthLocked] when a passcode is enrolled
-/// (R6.2).
+/// This keeps the passcode protecting what matters (the sensitive screen) while
+/// leaving everyday browsing (the lifecycle tabs) unobstructed.
 ///
 /// Presentation-layer only: depends on the application layer and domain auth
 /// types; never imports Drift or a plugin.
@@ -25,18 +26,20 @@ import '../../application/auth/auth.dart';
 import '../../domain/auth/auth.dart';
 import 'lock_screen.dart';
 
-/// Gates [child] behind the app lock and drives auto-lock on backgrounding.
-class AuthGate extends ConsumerStatefulWidget {
-  const AuthGate({required this.child, super.key});
+/// Root-level, invisible observer that re-locks the app after it has been
+/// backgrounded beyond the configured auto-lock timeout. It NEVER gates the UI
+/// — it only updates the lock state so the next time a [LockGuard] screen is
+/// opened it will require unlocking.
+class AutoLockObserver extends ConsumerStatefulWidget {
+  const AutoLockObserver({required this.child, super.key});
 
-  /// The app to show when unlocked or unconfigured.
   final Widget child;
 
   @override
-  ConsumerState<AuthGate> createState() => _AuthGateState();
+  ConsumerState<AutoLockObserver> createState() => _AutoLockObserverState();
 }
 
-class _AuthGateState extends ConsumerState<AuthGate>
+class _AutoLockObserverState extends ConsumerState<AutoLockObserver>
     with WidgetsBindingObserver {
   DateTime? _backgroundedAt;
 
@@ -66,8 +69,8 @@ class _AuthGateState extends ConsumerState<AuthGate>
     }
   }
 
-  /// Re-locks if the app was backgrounded longer than the configured timeout
-  /// (R6.1). A zero timeout locks immediately on any backgrounding.
+  /// Re-locks if the app was backgrounded for at least the configured timeout.
+  /// A `Never` timeout (represented as a negative sentinel) never auto-locks.
   Future<void> _maybeLockOnResume() async {
     final DateTime? since = _backgroundedAt;
     _backgroundedAt = null;
@@ -77,6 +80,9 @@ class _AuthGateState extends ConsumerState<AuthGate>
     final AuthCredentials? creds = await ctrl.currentCredentials();
     if (creds == null) return; // Unconfigured: nothing to lock.
 
+    // A negative lockTimeout means "Never auto-lock".
+    if (creds.lockTimeout.isNegative) return;
+
     final Duration away = DateTime.now().toUtc().difference(since);
     if (away >= creds.lockTimeout) {
       await ctrl.lock();
@@ -84,12 +90,24 @@ class _AuthGateState extends ConsumerState<AuthGate>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => widget.child;
+}
+
+/// Guards a single sensitive screen: shows [child] only while the app is
+/// unlocked (or no passcode is enrolled); otherwise shows the [LockScreen].
+///
+/// Wrap only sensitive destinations (e.g. Account & sync) with this. Opening a
+/// guarded screen while locked prompts for the passcode; everyday tabs are not
+/// wrapped and never prompt.
+class LockGuard extends ConsumerWidget {
+  const LockGuard({required this.child, super.key});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final AuthState state = ref.watch(authControllerProvider);
     final bool locked = state is AuthLocked || state is AuthCoolingDown;
-    if (locked) {
-      return const LockScreen();
-    }
-    return widget.child;
+    return locked ? const LockScreen() : child;
   }
 }

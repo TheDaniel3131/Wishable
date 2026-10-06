@@ -117,7 +117,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
         ),
         const SizedBox(height: 16),
         Text(
-          'Signing out keeps your Wishes on this device.',
+          'Signing out keeps your wishlists on this device.',
           style: theme.textTheme.bodySmall
               ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
         ),

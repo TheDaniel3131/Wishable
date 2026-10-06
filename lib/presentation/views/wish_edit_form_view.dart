@@ -89,7 +89,7 @@ class WishEditFormView extends ConsumerWidget {
     // Create mode needs no existing Wish — build the form immediately.
     if (_isCreate) {
       return const _FormScaffold(
-        title: 'New Wish',
+        title: 'New Wishlist',
         child: _WishForm(existing: null),
       );
     }
@@ -98,7 +98,7 @@ class WishEditFormView extends ConsumerWidget {
     // view so the form always reflects the stored record (R2).
     final AsyncValue<List<Wish>> wishes = ref.watch(allWishesProvider);
     return _FormScaffold(
-      title: 'Edit Wish',
+      title: 'Edit Wishlist',
       child: wishes.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (Object error, StackTrace _) =>
@@ -107,7 +107,7 @@ class WishEditFormView extends ConsumerWidget {
           final Wish? existing = _selectById(list, wishId!);
           if (existing == null) {
             return const _FormMessage(
-              message: 'This Wish is no longer available.',
+              message: 'This wishlist is no longer available.',
             );
           }
           return _WishForm(existing: existing);
@@ -138,7 +138,17 @@ class _FormScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
+      appBar: AppBar(
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 28,
+            fontWeight:
+                FontWeight.w600, // Added some weight so it looks good at 28px
+          ),
+        ),
+        centerTitle: true, // Centers the bigger text nicely
+      ),
       body: child,
     );
   }
@@ -296,7 +306,7 @@ class _WishFormState extends ConsumerState<_WishForm> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.save_outlined),
-            label: Text(_isCreate ? 'Create Wish' : 'Save changes'),
+            label: Text(_isCreate ? 'Create Wishlist' : 'Save changes'),
           ),
           const SizedBox(height: 8),
           OutlinedButton(

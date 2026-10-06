@@ -56,6 +56,6 @@ void main() {
     // The responsive shell is mounted (compact layout shows a NavigationBar).
     expect(find.byType(NavigationBar), findsOneWidget);
     // The app opens on the "All" lifecycle tab (R9.1): its AppBar title shows.
-    expect(find.text('All Wishes'), findsOneWidget);
+    expect(find.text('All Wishlists'), findsOneWidget);
   });
 }

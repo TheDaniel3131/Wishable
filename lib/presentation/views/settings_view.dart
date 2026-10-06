@@ -34,6 +34,8 @@
 /// operation can be repeated.
 library wishable.presentation.views.settings_view;
 
+import 'dart:typed_data';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,6 +44,7 @@ import '../../application/application.dart';
 import '../../domain/backup.dart';
 import '../../theme/app_theme.dart';
 import '../account/account_view.dart';
+import '../auth/auth_gate.dart';
 import '../auth/passcode_setup_view.dart';
 
 /// The Settings screen exposing backup export and restore import controls.
@@ -175,7 +178,11 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
               child: OutlinedButton.icon(
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (BuildContext _) => const AccountView(),
+                    // Account & sync is sensitive: guard it behind the app
+                    // lock so opening it requires unlocking when a passcode is
+                    // enrolled and the app is locked.
+                    builder: (BuildContext _) =>
+                        const LockGuard(child: AccountView()),
                   ),
                 ),
                 icon: const Icon(Icons.cloud_outlined),
@@ -188,21 +195,50 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
     );
   }
 
-  /// Prompts for a save destination and, if chosen, triggers an export in the
-  /// requested [format] (R11.1–R11.3). A cancelled dialog is a no-op.
+  /// Exports the requested [format] (R11.1–R11.3), cross-platform.
+  ///
+  /// The content is produced in memory by the controller, then handed to the
+  /// platform save dialog as `bytes`. Passing bytes is what makes this work on
+  /// web (which triggers a download — a save dialog with no bytes returns null
+  /// there) and reliably writes the file on desktop/mobile. A cancelled dialog
+  /// is a no-op.
   Future<void> _export(BackupFormat format) async {
-    final String? path = await FilePicker.platform.saveFile(
-      dialogTitle: 'Export ${_formatLabel(format)}',
-      fileName: _suggestedFileName(format),
-      type: FileType.custom,
-      allowedExtensions: <String>[_extensionOf(format)],
-    );
-    if (path == null) {
-      // User dismissed the dialog — nothing to export.
+    final BackupBytes? content =
+        await ref.read(backupControllerProvider.notifier).prepareExport(format);
+    if (content == null) {
+      // prepareExport failed; the controller set a BackupError which the
+      // listener surfaces as a SnackBar.
       return;
     }
-    final ExportTarget target = ExportTarget(path: path, format: format);
-    await ref.read(backupControllerProvider.notifier).export(target);
+    try {
+      final String? path = await FilePicker.platform.saveFile(
+        dialogTitle: 'Export ${_formatLabel(format)}',
+        fileName: content.suggestedFileName,
+        type: FileType.custom,
+        allowedExtensions: <String>[_extensionOf(format)],
+        bytes: Uint8List.fromList(content.bytes),
+      );
+      if (!mounted) return;
+      if (path == null) {
+        // On web, saveFile returns null even on success (the browser handles
+        // the download), so only show "saved to <path>" when we actually got
+        // one; otherwise confirm the download generically.
+        _showSnackBar(
+          'Exported ${content.wishCount} '
+          '${content.wishCount == 1 ? 'wishlist' : 'wishlists'} '
+          '(${content.suggestedFileName}).',
+        );
+      } else {
+        _showSnackBar(
+          'Exported ${content.wishCount} '
+          '${content.wishCount == 1 ? 'wishlist' : 'wishlists'} to $path.',
+        );
+      }
+    } catch (error) {
+      if (mounted) {
+        _showSnackBar('Export failed: $error', isError: true);
+      }
+    }
   }
 
   /// Prompts for a backup file and, if chosen, inspects it (read-and-validate
@@ -339,10 +375,6 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
         BackupFormat.json => 'json',
         BackupFormat.csv => 'csv',
       };
-
-  /// Suggested default file name for a save dialog in the given [format].
-  static String _suggestedFileName(BackupFormat format) =>
-      'wishable-backup.${_extensionOf(format)}';
 
   /// Infers a [BackupFormat] from a file [path]'s extension, or `null` when
   /// the extension is not a recognized backup type.

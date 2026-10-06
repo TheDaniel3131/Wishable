@@ -50,7 +50,7 @@ Widget _app(_FakeStore store) {
           const PasscodeHasher(kdf: KdfParams(iterations: 50))),
     ],
     child: const MaterialApp(
-      home: AuthGate(
+      home: LockGuard(
         child: Scaffold(body: Center(child: Text('WISHES', key: _appContent))),
       ),
     ),
@@ -93,7 +93,7 @@ void main() {
     expect(find.byKey(_appContent), findsNothing);
 
     // Drive an unlock through the controller element.
-    final BuildContext ctx = tester.element(find.byType(AuthGate));
+    final BuildContext ctx = tester.element(find.byType(LockGuard));
     final ProviderContainer container = ProviderScope.containerOf(ctx);
     final AuthOutcome outcome =
         await container.read(authControllerProvider.notifier).unlock('123456');

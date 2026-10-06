@@ -104,9 +104,6 @@ final class AuthController extends Notifier<AuthState> {
     if (v is PasscodeInvalid) {
       return AuthInvalid(v.message);
     }
-    // Yield once so the UI can paint its busy state before the (synchronous)
-    // KDF derivation runs on this isolate.
-    await Future<void>.delayed(Duration.zero);
     final AuthCredentials creds = _hasher.enroll(
       passcode,
       kind,
@@ -138,9 +135,6 @@ final class AuthController extends Notifier<AuthState> {
       return AuthLockedOut(decision.remaining);
     }
 
-    // Yield so the lock screen can paint its busy state before the synchronous
-    // KDF verification runs.
-    await Future<void>.delayed(Duration.zero);
     if (_hasher.verify(passcode, creds)) {
       await _store.writeFailureState(AuthFailureState.none);
       state = const AuthUnlocked();

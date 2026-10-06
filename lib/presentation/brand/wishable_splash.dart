@@ -53,21 +53,39 @@ class _WishableSplashState extends State<WishableSplash>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                const WishableWordmark(markSize: 96),
-                const SizedBox(height: 28),
-                Text(
-                  'Turn Wishes Into Achievements',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                // Big brand wordmark, wrapped in FittedBox + horizontal padding
+                // so it scales down to fit narrow viewports instead of
+                // overflowing.
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: WishableWordmark(markSize: 144),
+                  ),
                 ),
-                const SizedBox(height: 36),
+                const SizedBox(height: 32),
+
+                // 2. Enhanced the typography for the tagline
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Text(
+                    'Turn Wishes Into Achievements',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          letterSpacing: 0.5,
+                        ),
+                  ),
+                ),
+                const SizedBox(height: 48), // Added a bit more breathing room
+
+                // 3. Made the loading bar wider and thicker to feel like a true loading screen
                 SizedBox(
-                  width: 120,
+                  width: 200,
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12), // Rounder edges
                     child: LinearProgressIndicator(
-                      minHeight: 4,
+                      minHeight: 6, // Thicker bar
                       backgroundColor:
                           AppTheme.brandGradientStart.withValues(alpha: 0.15),
                       valueColor: const AlwaysStoppedAnimation<Color>(

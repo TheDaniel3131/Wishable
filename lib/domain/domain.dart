@@ -18,6 +18,7 @@ export 'lifecycle_status.dart';
 export 'priority.dart';
 export 'wish.dart';
 export 'wish_csv_codec.dart';
+export 'wish_image.dart';
 export 'wish_input.dart';
 export 'wish_json_codec.dart';
 export 'wish_validator.dart';

@@ -132,6 +132,12 @@ final class _InertSyncService implements SyncService {
       const <RemoteChange>[];
   @override
   Future<List<RemoteChange>> fullReconcile() async => const <RemoteChange>[];
+  @override
+  Future<void> pushLocalImages(
+      List<LocalImageUpload> uploads, List<String> deletedIds) async {}
+  @override
+  Future<List<RemoteImageChange>> pullRemoteImages(DateTime? since) async =>
+      const <RemoteImageChange>[];
 }
 
 /// Connectivity probe backed by `connectivity_plus`.

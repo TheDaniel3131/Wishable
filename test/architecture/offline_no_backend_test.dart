@@ -187,6 +187,14 @@ void main() {
         if (entity is! File || !entity.path.endsWith('.dart')) {
           continue;
         }
+        final String rel = entity.path.replaceAll(r'\', '/');
+        // The optional PocketBase sync adapter legitimately uses `package:http`
+        // to download image bytes (Option A). It is confined to this folder;
+        // the offline-first group below proves the local graph never imports
+        // it, so network usage here does not break the offline guarantee.
+        if (rel.contains('lib/data/account/remote/')) {
+          continue;
+        }
         final String source = entity.readAsStringSync();
         for (final RegExp pattern in _networkSourcePatterns) {
           if (pattern.hasMatch(source)) {
@@ -198,8 +206,8 @@ void main() {
       expect(
         offenders,
         isEmpty,
-        reason: 'no source file may use a network/HTTP client (R10.3). '
-            'Found: $offenders',
+        reason: 'no network/HTTP client outside the optional remote adapter '
+            '(R10.3). Found: $offenders',
       );
     });
   });
@@ -304,9 +312,12 @@ void main() {
 // --- No-backend helpers -----------------------------------------------------
 
 /// Exact package names that are forbidden outright.
+///
+/// NOTE: `http` is intentionally NOT forbidden. It is used ONLY by the optional
+/// PocketBase sync adapter under `data/account/remote/` to download image file
+/// bytes (Option A file storage). The offline-first test below enforces that it
+/// is confined there and never imported by the local app graph.
 const Set<String> _forbiddenExactNames = <String>{
-  'http',
-  'http_parser',
   'dio',
   'cloud_firestore',
   'cloud_functions',

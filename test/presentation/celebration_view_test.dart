@@ -57,8 +57,8 @@ void main() {
       // R7.1: the celebration carries the "Wish fulfilled" message. Assert via
       // the exported const so the test tracks the single source of truth.
       expect(find.text(celebrationMessage), findsOneWidget,
-          reason: 'the celebration must show the "Wish fulfilled" message');
-      expect(celebrationMessage, 'Wish fulfilled');
+          reason: 'the celebration must show the fulfilled message');
+      expect(celebrationMessage, 'Wishlist fulfilled');
 
       // R7.3: the completed Wish's title identifies which Wish was fulfilled.
       expect(find.text(sampleTitle), findsOneWidget,

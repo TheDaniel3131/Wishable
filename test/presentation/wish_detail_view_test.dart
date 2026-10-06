@@ -40,6 +40,7 @@ import 'package:wishable/domain/lifecycle_event.dart';
 import 'package:wishable/domain/lifecycle_status.dart';
 import 'package:wishable/domain/priority.dart';
 import 'package:wishable/domain/wish.dart';
+import 'package:wishable/domain/wish_image.dart';
 import 'package:wishable/domain/wish_input.dart';
 import 'package:wishable/presentation/router/app_router.dart';
 import 'package:wishable/presentation/views/wish_detail_view.dart';
@@ -92,6 +93,11 @@ void main() {
         wishRepositoryProvider.overrideWithValue(wishRepo),
         // The category-name FutureProvider reads getAll() through this.
         categoryRepositoryProvider.overrideWithValue(categoryRepo),
+        // The image gallery watches this; emit an empty list so it renders its
+        // empty state without opening a real Drift database.
+        wishImagesProvider(knownId).overrideWith(
+          (Ref ref) => Stream<List<WishImage>>.value(const <WishImage>[]),
+        ),
       ],
     );
     return (container: container, wishRepo: wishRepo);
@@ -159,13 +165,24 @@ void main() {
       expect(find.text('40%'), findsWidgets);
 
       // Both UTC timestamps are rendered as ISO-8601 "... (UTC)" strings.
+      // The detail body is a scrolling ListView and now also hosts the image
+      // gallery, so the timestamp rows may be below the fold — scroll them into
+      // view before asserting.
+      final Finder createdFinder =
+          find.text('${createdAt.toIso8601String()} (UTC)');
+      await tester.scrollUntilVisible(createdFinder, 200,
+          scrollable: find.byType(Scrollable).first);
       expect(
-        find.text('${createdAt.toIso8601String()} (UTC)'),
+        createdFinder,
         findsOneWidget,
         reason: 'the created timestamp must be shown in UTC (R9.5, R14.2)',
       );
+      final Finder updatedFinder =
+          find.text('${updatedAt.toIso8601String()} (UTC)');
+      await tester.scrollUntilVisible(updatedFinder, 200,
+          scrollable: find.byType(Scrollable).first);
       expect(
-        find.text('${updatedAt.toIso8601String()} (UTC)'),
+        updatedFinder,
         findsOneWidget,
         reason: 'the last-updated timestamp must be shown in UTC (R9.5)',
       );
@@ -188,7 +205,7 @@ void main() {
 
       // The confirmation dialog is shown with both actions, and NOTHING has
       // been deleted yet (R8.2).
-      expect(find.text('Delete Wish?'), findsOneWidget);
+      expect(find.text('Delete wishlist?'), findsOneWidget);
       expect(find.widgetWithText(TextButton, 'Cancel'), findsOneWidget);
       expect(find.widgetWithText(FilledButton, 'Delete'), findsOneWidget);
       expect(wishRepo.deleteCalls, isEmpty,
@@ -198,7 +215,7 @@ void main() {
       await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Delete Wish?'), findsNothing,
+      expect(find.text('Delete wishlist?'), findsNothing,
           reason: 'cancelling dismisses the confirmation');
       expect(wishRepo.deleteCalls, isEmpty,
           reason: 'cancelling must perform no delete (R8.3)');
@@ -219,7 +236,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Prompt is up and still nothing deleted.
-      expect(find.text('Delete Wish?'), findsOneWidget);
+      expect(find.text('Delete wishlist?'), findsOneWidget);
       expect(wishRepo.deleteCalls, isEmpty,
           reason: 'the delete must not happen before confirmation (R8.2)');
 
@@ -229,7 +246,7 @@ void main() {
 
       expect(wishRepo.deleteCalls, <WishId>[knownId],
           reason: 'confirming the prompt triggers the delete write (R8.1)');
-      expect(find.text('Delete Wish?'), findsNothing,
+      expect(find.text('Delete wishlist?'), findsNothing,
           reason: 'the confirmation is dismissed on confirm');
     },
   );

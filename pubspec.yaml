@@ -44,6 +44,7 @@ dependencies:
   # local, offline-first app never depends on it (offline-first test, R14).
   pocketbase: ^0.22.0 # official PocketBase Dart SDK
   connectivity_plus: ^6.0.5 # observe connectivity so sync runs only when online
+  http: ^1.2.0 # download image file bytes from PocketBase (remote adapter only)
 
   # Web persistence assets for Drift (WasmDatabase / OPFS).
   web: ^1.1.0

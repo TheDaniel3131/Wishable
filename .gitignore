@@ -96,3 +96,14 @@ coverage/
 # One-off icon generator tooling (dev-time only; see scripts/icongen/generate.js)
 scripts/icongen/node_modules/
 scripts/icongen/package-lock.json
+
+# --- Kiro / Kilo ------------------------------------------------------------
+# .kilo holds local git worktrees and scratch projects — machine-local, must
+# NEVER be committed (nesting worktrees inside the repo breaks git).
+.kilo/
+
+# .kiro IS committed on purpose: it holds the project's specs, custom agents,
+# steering, and hooks — shareable, human-authored project knowledge. Only the
+# machine-local / secret bits inside it are excluded:
+.kiro/settings/mcp.json    # may contain MCP server API keys/tokens
+.kiro/**/*.local.*         # any explicitly machine-local files

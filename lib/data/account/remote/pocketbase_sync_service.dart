@@ -22,22 +22,29 @@
 /// server received the write.
 library wishable.data.account.remote.pocketbase_sync_service;
 
+import 'package:http/http.dart' as http;
 import 'package:pocketbase/pocketbase.dart';
 
 import '../../../domain/lifecycle_status.dart';
 import '../../../domain/priority.dart';
 import '../../../domain/wish.dart';
+import '../../../domain/wish_image.dart';
 import '../sync_service.dart';
 
-/// PocketBase-backed sync transport over a `wishes` collection.
+/// PocketBase-backed sync transport over a `wishes` collection and a
+/// `wish_images` collection (one record per image, with a PocketBase `file`
+/// field holding the image bytes — Option A file storage).
 final class PocketbaseSyncService implements SyncService {
   PocketbaseSyncService(
     this._pb, {
     String collection = 'wishes',
-  }) : _collection = collection;
+    String imageCollection = 'wish_images',
+  })  : _collection = collection,
+        _imageCollection = imageCollection;
 
   final PocketBase _pb;
   final String _collection;
+  final String _imageCollection;
 
   /// The signed-in user's id, used as the `owner` relation and to scope reads.
   String get _ownerId => _pb.authStore.record?.id ?? '';
@@ -97,6 +104,124 @@ final class PocketbaseSyncService implements SyncService {
               sort: 'wishUpdatedAt',
             );
     return records.map(_toChange).toList(growable: false);
+  }
+
+  // --- Images (Option A: PocketBase file storage) --------------------------
+  //
+  // One `wish_images` record per image. Fields: owner (relation to user),
+  // imageId (stable UUID = sync identity), wishId (which Wish it belongs to),
+  // mimeType, position, imgCreatedAt (datetime), imgDeletedAt (nullable
+  // tombstone), and `file` (PocketBase file field holding the bytes).
+
+  @override
+  Future<void> pushLocalImages(
+    List<LocalImageUpload> uploads,
+    List<String> deletedIds,
+  ) async {
+    for (final LocalImageUpload up in uploads) {
+      // Only create if the image is not already on the server (uploads are
+      // immutable; an image's bytes never change after creation).
+      final RecordModel? existing = await _findImageByImageId(up.id);
+      if (existing != null) {
+        continue;
+      }
+      await _pb.collection(_imageCollection).create(
+        body: <String, dynamic>{
+          'owner': _ownerId,
+          'imageId': up.id,
+          'wishId': up.wishId,
+          'mimeType': up.mimeType,
+          'position': up.position,
+          'imgCreatedAt': up.createdAtUtc.toUtc().toIso8601String(),
+        },
+        files: <http.MultipartFile>[
+          http.MultipartFile.fromBytes(
+            'file',
+            up.bytes,
+            filename: '${up.id}${_extensionFor(up.mimeType)}',
+          ),
+        ],
+      );
+    }
+    // Tombstone remote images for local deletes so other devices learn of them.
+    for (final String imageId in deletedIds) {
+      final RecordModel? existing = await _findImageByImageId(imageId);
+      if (existing != null) {
+        await _pb.collection(_imageCollection).update(
+          existing.id,
+          body: <String, dynamic>{
+            'imgDeletedAt': DateTime.now().toUtc().toIso8601String(),
+          },
+        );
+      }
+    }
+  }
+
+  @override
+  Future<List<RemoteImageChange>> pullRemoteImages(DateTime? since) async {
+    final String ownerFilter = "owner = '$_ownerId'";
+    final String filter = since == null
+        ? ownerFilter
+        : "$ownerFilter && imgCreatedAt >= '${since.toUtc().toIso8601String()}'";
+    final List<RecordModel> records =
+        await _pb.collection(_imageCollection).getFullList(filter: filter);
+
+    final List<RemoteImageChange> changes = <RemoteImageChange>[];
+    for (final RecordModel record in records) {
+      final Map<String, dynamic> d = record.toJson();
+      final String imageId = _asString(d['imageId']) ?? '';
+      final String? deleted = _asString(d['imgDeletedAt']);
+      if (deleted != null && deleted.isNotEmpty) {
+        changes.add(RemoteImageChange.delete(imageId));
+        continue;
+      }
+      final String fileName = _asString(d['file']) ?? '';
+      if (fileName.isEmpty) {
+        continue;
+      }
+      // Download the file bytes so they can be cached locally.
+      final Uri url = _pb.files.getUrl(record, fileName);
+      final http.Response resp = await http.get(url);
+      if (resp.statusCode != 200) {
+        continue; // skip this image; a later sync retries
+      }
+      changes.add(RemoteImageChange.upsert(
+        WishImage(
+          id: imageId,
+          wishId: _asString(d['wishId']) ?? '',
+          bytes: resp.bodyBytes,
+          mimeType: _asString(d['mimeType']) ?? 'image/jpeg',
+          position: (d['position'] as num?)?.toInt() ?? 0,
+          createdAtUtc:
+              _parseDateTime(d['imgCreatedAt']) ?? DateTime.now().toUtc(),
+          remoteName: fileName,
+        ),
+      ));
+    }
+    return changes;
+  }
+
+  Future<RecordModel?> _findImageByImageId(String imageId) async {
+    final List<RecordModel> found =
+        await _pb.collection(_imageCollection).getFullList(
+              filter: "owner = '$_ownerId' && imageId = '$imageId'",
+            );
+    return found.isEmpty ? null : found.first;
+  }
+
+  static String _extensionFor(String mimeType) {
+    switch (mimeType) {
+      case 'image/png':
+        return '.png';
+      case 'image/gif':
+        return '.gif';
+      case 'image/webp':
+        return '.webp';
+      case 'image/heic':
+        return '.heic';
+      default:
+        return '.jpg';
+    }
   }
 
   // --- Mapping -------------------------------------------------------------

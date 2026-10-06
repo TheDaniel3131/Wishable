@@ -27,6 +27,12 @@ abstract interface class BackupService {
   /// Exports a fixed-column CSV document to [t] (R11.3).
   Future<ExportResult> exportCsv(ExportTarget t);
 
+  /// Produces the export content for [format] in memory, without writing a
+  /// file. The presentation layer delivers the bytes per platform (write to a
+  /// chosen path on desktop/mobile, or a browser download on web). This is the
+  /// cross-platform export path (R11.1–R11.3) that works on web too.
+  Future<BackupBytes> exportToBytes(BackupFormat format);
+
   /// Reads and fully validates [file], returning a preview; rejects a
   /// malformed or unreadable file with a descriptive error and no write
   /// (R12.2).

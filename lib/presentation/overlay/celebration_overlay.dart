@@ -33,7 +33,7 @@ import '../../theme/app_theme.dart';
 
 /// The message shown by the Celebration View (R7.1). Exposed so tests can
 /// assert on the exact copy without duplicating the literal.
-const String celebrationMessage = 'Wish fulfilled';
+const String celebrationMessage = 'Wishlist fulfilled';
 
 /// Wraps the app's content and presents the [CelebrationView] as a modal
 /// overlay whenever the [CelebrationController] emits a [CelebrationEvent].
@@ -70,10 +70,8 @@ class _CelebrationListenerState extends ConsumerState<CelebrationListener> {
     // Subscribe once to the broadcast stream of celebration events. Reading
     // (not watching) the provider is correct here: the controller is a stable
     // singleton and we drive one-shot UI from its stream.
-    _subscription = ref
-        .read(celebrationControllerProvider)
-        .events
-        .listen(_onCelebration);
+    _subscription =
+        ref.read(celebrationControllerProvider).events.listen(_onCelebration);
   }
 
   @override

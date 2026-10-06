@@ -72,7 +72,7 @@ class WishListView extends ConsumerWidget {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: const Text('Delete Wish?'),
+        title: const Text('Delete wishlist?'),
         content: Text('Delete "${wish.title}"? This cannot be undone.'),
         actions: <Widget>[
           TextButton(
@@ -141,16 +141,13 @@ class WishListView extends ConsumerWidget {
       // Enlarged for a prominent, premium primary action.
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.goNamed(WishRoutes.newWishName),
-        icon: const Icon(Icons.add, size: 28),
-        label: const Padding(
-          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 4),
-          child: Text(
-            'New Wish',
-            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
-          ),
+        icon: const Icon(Icons.add, size: 26),
+        label: const Text(
+          'New Wishlist',
+          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
         ),
-        extendedPadding: const EdgeInsets.symmetric(horizontal: 24),
-        tooltip: 'Create a new Wish',
+        extendedPadding: const EdgeInsets.symmetric(horizontal: 22),
+        tooltip: 'Create a new wishlist',
       ),
     );
   }
@@ -169,7 +166,7 @@ class _WishListTile extends ConsumerWidget {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: const Text('Delete Wish?'),
+        title: const Text('Delete wishlist?'),
         content: Text('Delete "${wish.title}"? This cannot be undone.'),
         actions: <Widget>[
           TextButton(
@@ -194,8 +191,23 @@ class _WishListTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
     final double fraction = (wish.progress.clamp(0, 100)) / 100;
+    final AsyncValue<WishImage?> cover =
+        ref.watch(wishCoverImageProvider(wish.id));
     return ListTile(
-      leading: Icon(_statusIcon(wish.status)),
+      leading: cover.maybeWhen(
+        data: (WishImage? img) => img == null
+            ? Icon(_statusIcon(wish.status))
+            : ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.memory(
+                  img.bytes,
+                  width: 44,
+                  height: 44,
+                  fit: BoxFit.cover,
+                ),
+              ),
+        orElse: () => Icon(_statusIcon(wish.status)),
+      ),
       title: Text(
         wish.title,
         maxLines: 1,
@@ -429,7 +441,7 @@ class _ErrorState extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Something went wrong loading your Wishes.',
+              'Something went wrong loading your wishlists.',
               textAlign: TextAlign.center,
               style: theme.textTheme.titleMedium,
             ),
@@ -455,9 +467,9 @@ class AllWishesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return WishListView(
-      title: 'All Wishes',
+      title: 'All Wishlists',
       provider: allWishesProvider,
-      emptyMessage: 'No Wishes yet. Tap + to add your first aspiration.',
+      emptyMessage: 'No wishlists yet. Tap + to add your first aspiration.',
     );
   }
 }
@@ -469,9 +481,9 @@ class ActiveWishesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return WishListView(
-      title: 'Active Wishes',
+      title: 'Active Wishlists',
       provider: activeWishesProvider,
-      emptyMessage: 'No active Wishes. New Wishes start here.',
+      emptyMessage: 'No active wishlists. New wishlists start here.',
     );
   }
 }
@@ -483,9 +495,9 @@ class InProgressWishesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return WishListView(
-      title: 'In-progress Wishes',
+      title: 'In-progress Wishlists',
       provider: inProgressWishesProvider,
-      emptyMessage: 'Nothing in progress yet. Start a Wish to see it here.',
+      emptyMessage: 'Nothing in progress yet. Start a wishlist to see it here.',
     );
   }
 }
@@ -497,9 +509,10 @@ class CompletedWishesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return WishListView(
-      title: 'Completed Wishes',
+      title: 'Completed Wishlists',
       provider: completedWishesProvider,
-      emptyMessage: 'No completed Wishes yet. Fulfilled Wishes land here.',
+      emptyMessage:
+          'No completed wishlists yet. Fulfilled wishlists land here.',
     );
   }
 }

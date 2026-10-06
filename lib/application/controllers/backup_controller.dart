@@ -195,6 +195,24 @@ final class BackupController extends Notifier<BackupState> {
     }
   }
 
+  /// Produces the export content for [format] in memory so the UI can deliver
+  /// it per platform (save-dialog write on desktop/mobile, browser download on
+  /// web). Returns the [BackupBytes] on success, or null and sets a
+  /// [BackupError] on failure — the cross-platform export path.
+  Future<BackupBytes?> prepareExport(BackupFormat format) async {
+    state = const BackupInProgress();
+    try {
+      final BackupBytes bytes = await _service.exportToBytes(format);
+      // The one-shot success is reported by the UI after delivery; return to
+      // idle here so the "Working…" indicator clears.
+      state = const BackupIdle();
+      return bytes;
+    } catch (error) {
+      state = BackupError(_messageOf(error));
+      return null;
+    }
+  }
+
   /// Inspects [file] without writing and exposes the validated
   /// [ImportPreview] as [BackupImportPreviewReady] so the UI can show a
   /// REPLACE confirmation (R12.2, R12.3).

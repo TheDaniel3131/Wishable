@@ -24,6 +24,7 @@ import '../../data/account/sync_service.dart';
 import '../../domain/account/accounts.dart';
 import '../../domain/category.dart';
 import '../../domain/wish.dart';
+import '../../domain/wish_image.dart';
 import '../providers.dart';
 import 'account_providers.dart';
 
@@ -61,6 +62,9 @@ final class SyncController extends Notifier<SyncState> {
     try {
       await _pullAndApply();
       await _pushLocal();
+      // Images sync after wishes so a pulled image's owning wish already
+      // exists locally (the WishImages FK references wishes).
+      await _syncImages();
       _watermark = DateTime.now().toUtc();
       state = SyncIdle(lastSyncedUtc: _watermark);
     } catch (error) {
@@ -127,6 +131,55 @@ final class SyncController extends Notifier<SyncState> {
         w.copyWith(categoryId: nameById[w.categoryId] ?? w.categoryId),
     ];
     await _sync.pushLocalChanges(projected, const <String>[]);
+  }
+
+  /// Syncs attached images (Option A). Pulls remote image changes into the
+  /// local blob cache (adding new images, skipping ones already cached), then
+  /// pushes local images not yet on the server. Only images whose owning Wish
+  /// exists locally are added, since the local images table FKs to wishes.
+  Future<void> _syncImages() async {
+    final imageRepo = ref.read(wishImageRepositoryProvider);
+    final wishRepo = ref.read(wishRepositoryProvider);
+
+    // Pull: fetch remote image changes (bytes downloaded by the adapter).
+    final List<RemoteImageChange> remote =
+        await _sync.pullRemoteImages(_watermark);
+    final List<WishImage> localImages = await imageRepo.getAll();
+    final Set<String> localImageIds =
+        localImages.map((WishImage i) => i.id).toSet();
+    final Set<String> localWishIds =
+        (await wishRepo.getAll()).map((Wish w) => w.id).toSet();
+
+    for (final RemoteImageChange change in remote) {
+      if (change.deletedId != null) {
+        if (localImageIds.contains(change.deletedId)) {
+          await imageRepo.remove(change.deletedId!);
+        }
+        continue;
+      }
+      final WishImage img = change.image!;
+      // Add only if not already cached and its owning Wish is present locally.
+      if (!localImageIds.contains(img.id) &&
+          localWishIds.contains(img.wishId)) {
+        await imageRepo.add(img.wishId, img.bytes, img.mimeType,
+            id: img.id, remoteName: img.remoteName);
+      }
+    }
+
+    // Push: upload local images that aren't on the server yet.
+    final List<WishImage> toPush = await imageRepo.getAll();
+    final List<LocalImageUpload> uploads = <LocalImageUpload>[
+      for (final WishImage i in toPush)
+        LocalImageUpload(
+          id: i.id,
+          wishId: i.wishId,
+          bytes: i.bytes,
+          mimeType: i.mimeType,
+          position: i.position,
+          createdAtUtc: i.createdAtUtc,
+        ),
+    ];
+    await _sync.pushLocalImages(uploads, const <String>[]);
   }
 
   String _describe(Object error) =>

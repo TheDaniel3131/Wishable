@@ -45,6 +45,7 @@
 ///      operation back and leaves the database exactly as it was (R12.1).
 library wishable.data.repositories.drift_backup_service;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart';
@@ -179,6 +180,53 @@ final class DriftBackupService implements BackupService {
       wishCount: serializable.length,
       produce: (File tempFile) => tempFile.writeAsString(payload, flush: true),
     );
+  }
+
+  @override
+  Future<BackupBytes> exportToBytes(BackupFormat format) async {
+    try {
+      switch (format) {
+        case BackupFormat.json:
+          final _Snapshot snapshot = await _snapshot();
+          final List<SerializableWish> serializable = _project(snapshot);
+          final String payload = _jsonCodec.encode(serializable);
+          return BackupBytes(
+            bytes: utf8.encode(payload),
+            format: format,
+            suggestedFileName: 'wishable-backup.json',
+            wishCount: serializable.length,
+          );
+        case BackupFormat.csv:
+          final _Snapshot snapshot = await _snapshot();
+          final List<SerializableWish> serializable = _project(snapshot);
+          final String payload = _csvCodec.encode(serializable);
+          return BackupBytes(
+            bytes: utf8.encode(payload),
+            format: format,
+            suggestedFileName: 'wishable-backup.csv',
+            wishCount: serializable.length,
+          );
+        case BackupFormat.database:
+          // Raw SQLite file bytes (native only — a file-backed DB).
+          final List<Wish> wishes = await _snapshotWishes();
+          final String sourcePath = await _resolveDatabaseFilePath();
+          await _checkpoint();
+          final List<int> bytes = await File(sourcePath).readAsBytes();
+          return BackupBytes(
+            bytes: bytes,
+            format: format,
+            suggestedFileName: 'wishable-backup.sqlite',
+            wishCount: wishes.length,
+          );
+      }
+    } on BackupExportException {
+      rethrow;
+    } catch (error) {
+      throw BackupExportException(
+        'Failed to prepare the ${_formatLabel(format)} export.',
+        cause: error,
+      );
+    }
   }
 
   // --- Import operations (task 9.2) ----------------------------------------
