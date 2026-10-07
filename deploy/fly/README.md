@@ -41,6 +41,8 @@ Pick an app name and a region. Decline any Postgres/Redis offers. Update the
 `app` and `primary_region` values in `fly.toml` to match if `fly launch`
 rewrote them.
 
+after that, you can skip to flyctl deploy immediately, skip the rest of the steps.
+
 ### 3. Create the persistent volume (same region as the app)
 
 ```powershell
