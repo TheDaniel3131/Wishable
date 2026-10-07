@@ -5,7 +5,7 @@
 #
 # Replace `app` and `primary_region` with the values `fly launch` assigns you.
 
-app = "wishable-pb"
+app = "wishable"
 primary_region = "sea"
 
 [build]
