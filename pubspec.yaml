@@ -46,6 +46,13 @@ dependencies:
   connectivity_plus: ^6.0.5 # observe connectivity so sync runs only when online
   http: ^1.2.0 # download image file bytes from PocketBase (remote adapter only)
 
+  # Local scheduled notifications (reminders + periodic nudge). Supports
+  # Android/iOS/macOS/Linux/Windows; web is a graceful no-op behind the
+  # notifications conditional-import seam. Imported ONLY by the data/notify
+  # native implementation.
+  flutter_local_notifications: ^18.0.1
+  timezone: ^0.9.4 # zoned scheduling for flutter_local_notifications
+
   # Web persistence assets for Drift (WasmDatabase / OPFS).
   web: ^1.1.0
 

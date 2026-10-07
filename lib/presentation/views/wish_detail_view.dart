@@ -89,6 +89,11 @@ class WishDetailView extends ConsumerWidget {
         ),
         actions: <Widget>[
           IconButton(
+            tooltip: 'Set reminder',
+            icon: const Icon(Icons.notification_add_outlined),
+            onPressed: () => _onSetReminder(context, ref),
+          ),
+          IconButton(
             tooltip: 'Edit',
             icon: const Icon(Icons.edit_outlined),
             onPressed: () => context.goNamed(
@@ -127,6 +132,77 @@ class WishDetailView extends ConsumerWidget {
       }
     }
     return null;
+  }
+
+  /// Prompts for a date + time and schedules a one-off reminder for this
+  /// wishlist. Requires notifications to be enabled (and the platform to
+  /// support them); otherwise points the user to Settings.
+  Future<void> _onSetReminder(BuildContext context, WidgetRef ref) async {
+    final NotificationController notifier =
+        ref.read(notificationControllerProvider.notifier);
+    final NotificationSettings settings =
+        ref.read(notificationControllerProvider).value ??
+            const NotificationSettings();
+    if (!notifier.isSupported) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Notifications are not available on this platform.')),
+      );
+      return;
+    }
+    if (!settings.enabled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Enable notifications in Settings first.')),
+      );
+      return;
+    }
+
+    final Wish? wish = ref.read(allWishesProvider).maybeWhen(
+        data: (List<Wish> l) => _selectById(l, wishId), orElse: () => null);
+    if (wish == null) return;
+
+    final DateTime now = DateTime.now();
+    final DateTime? date = await showDatePicker(
+      context: context,
+      initialDate: now.add(const Duration(days: 1)),
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 365 * 5)),
+    );
+    if (date == null || !context.mounted) return;
+    final TimeOfDay? time = await showTimePicker(
+      context: context,
+      initialTime: const TimeOfDay(hour: 9, minute: 0),
+    );
+    if (time == null) return;
+
+    final DateTime when = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      time.hour,
+      time.minute,
+    );
+    if (!when.isAfter(DateTime.now())) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Pick a time in the future.')),
+        );
+      }
+      return;
+    }
+    await notifier.scheduleReminder(wish, when.toUtc());
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Reminder set for ${_formatWhen(when)}.')),
+      );
+    }
+  }
+
+  static String _formatWhen(DateTime dt) {
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${dt.year}-${two(dt.month)}-${two(dt.day)} '
+        '${two(dt.hour)}:${two(dt.minute)}';
   }
 
   /// Begins the confirmation-gated delete flow (R8.2): asks the controller for

@@ -15,6 +15,7 @@ export 'ids.dart';
 export 'lifecycle_event.dart';
 export 'lifecycle_policy.dart';
 export 'lifecycle_status.dart';
+export 'notifications.dart';
 export 'priority.dart';
 export 'wish.dart';
 export 'wish_csv_codec.dart';

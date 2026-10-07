@@ -40,6 +40,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/application.dart';
 import '../../domain/backup.dart';
+import '../../domain/notifications.dart';
 import '../../theme/app_theme.dart';
 import '../account/account_view.dart';
 import '../auth/auth_gate.dart';
@@ -141,6 +142,17 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                 ],
               ),
             ),
+          const Divider(height: 32),
+          const _SectionHeader(
+            icon: Icons.notifications_outlined,
+            title: 'Notifications',
+            subtitle: 'Get reminders so your wishlists keep moving without '
+                'opening the app.',
+          ),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 4, 16, 8),
+            child: _NotificationSettingsSection(),
+          ),
           const Divider(height: 32),
           const _SectionHeader(
             icon: Icons.lock_outline,
@@ -418,6 +430,147 @@ class _SectionHeader extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Notification preferences: enable toggle, periodic nudge cadence, and the
+/// time of day it fires. On platforms without notification support (web) it
+/// shows a short "not available here" note instead.
+class _NotificationSettingsSection extends ConsumerWidget {
+  const _NotificationSettingsSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ThemeData theme = Theme.of(context);
+    final controller = ref.read(notificationControllerProvider.notifier);
+    final AsyncValue<NotificationSettings> state =
+        ref.watch(notificationControllerProvider);
+
+    if (!controller.isSupported) {
+      return Text(
+        'Notifications are not available on this platform.',
+        style: theme.textTheme.bodySmall
+            ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+      );
+    }
+
+    return state.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 12),
+        child: LinearProgressIndicator(),
+      ),
+      error: (Object e, StackTrace _) => Text('Could not load: $e'),
+      data: (NotificationSettings settings) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Enable notifications'),
+              subtitle: const Text('Reminders about your wishlists'),
+              value: settings.enabled,
+              onChanged: (bool on) async {
+                if (on) {
+                  final bool granted = await controller.enable();
+                  if (!granted && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content:
+                            Text('Notification permission was not granted.'),
+                      ),
+                    );
+                  }
+                } else {
+                  await controller.disable();
+                }
+              },
+            ),
+            if (settings.enabled) ...<Widget>[
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.repeat),
+                title: const Text('Keep-going nudge'),
+                subtitle: Text(_nudgeLabel(settings)),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _editNudge(context, ref, settings),
+              ),
+            ],
+          ],
+        );
+      },
+    );
+  }
+
+  String _nudgeLabel(NotificationSettings s) {
+    final String time =
+        '${s.nudgeHour.toString().padLeft(2, '0')}:${s.nudgeMinute.toString().padLeft(2, '0')}';
+    return switch (s.nudgeFrequency) {
+      NudgeFrequency.off => 'Off',
+      NudgeFrequency.daily => 'Daily at $time',
+      NudgeFrequency.weekly => 'Weekly at $time',
+    };
+  }
+
+  Future<void> _editNudge(
+    BuildContext context,
+    WidgetRef ref,
+    NotificationSettings settings,
+  ) async {
+    final controller = ref.read(notificationControllerProvider.notifier);
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (BuildContext sheetCtx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+              child: Text('Nudge me…',
+                  style: Theme.of(sheetCtx).textTheme.titleMedium),
+            ),
+            for (final (String label, NudgeFrequency f)
+                in <(String, NudgeFrequency)>[
+              ('Off', NudgeFrequency.off),
+              ('Daily', NudgeFrequency.daily),
+              ('Weekly', NudgeFrequency.weekly),
+            ])
+              ListTile(
+                title: Text(label),
+                trailing: settings.nudgeFrequency == f
+                    ? Icon(Icons.check,
+                        color: Theme.of(sheetCtx).colorScheme.primary)
+                    : null,
+                onTap: () async {
+                  Navigator.of(sheetCtx).pop();
+                  await controller.setNudge(f);
+                },
+              ),
+            if (settings.nudgeFrequency != NudgeFrequency.off)
+              ListTile(
+                leading: const Icon(Icons.schedule),
+                title: const Text('Time'),
+                subtitle: Text(
+                    '${settings.nudgeHour.toString().padLeft(2, '0')}:${settings.nudgeMinute.toString().padLeft(2, '0')}'),
+                onTap: () async {
+                  Navigator.of(sheetCtx).pop();
+                  final TimeOfDay? picked = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay(
+                        hour: settings.nudgeHour, minute: settings.nudgeMinute),
+                  );
+                  if (picked != null) {
+                    await controller.setNudge(settings.nudgeFrequency,
+                        hour: picked.hour, minute: picked.minute);
+                  }
+                },
+              ),
+            const SizedBox(height: 8),
+          ],
+        ),
       ),
     );
   }

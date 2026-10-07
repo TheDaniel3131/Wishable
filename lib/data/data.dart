@@ -11,5 +11,6 @@ library wishable.data;
 
 export 'app_database.dart';
 export 'auth/auth.dart';
+export 'notify/notify.dart';
 export 'repositories/repositories.dart';
 export 'tables.dart';

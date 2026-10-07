@@ -33,8 +33,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wishable/application/application.dart';
+import 'package:wishable/data/notify/notify.dart';
 import 'package:wishable/data/repositories/backup_service.dart';
 import 'package:wishable/domain/backup.dart';
+import 'package:wishable/domain/notifications.dart';
 import 'package:wishable/presentation/views/settings_view.dart';
 
 void main() {
@@ -53,6 +55,17 @@ void main() {
     path: '/tmp/wishable-backup.json',
     format: BackupFormat.json,
   );
+
+  // SettingsView renders a notifications section backed by the notification
+  // controller, which otherwise reaches the real Drift database (unavailable in
+  // a widget test). Override the service with a no-op and the settings store
+  // with an in-memory fake so building the view never touches a real DB.
+  List<Override> notificationOverrides() => <Override>[
+        notificationServiceProvider
+            .overrideWithValue(const NoopNotificationService()),
+        notificationSettingsStoreProvider
+            .overrideWithValue(_FakeNotificationSettingsStore()),
+      ];
 
   Future<_FakeBackupService> pumpSettings(
     WidgetTester tester,
@@ -75,6 +88,7 @@ void main() {
       final ProviderContainer container = ProviderContainer(
         overrides: <Override>[
           backupServiceProvider.overrideWithValue(fake),
+          ...notificationOverrides(),
         ],
       );
       addTearDown(container.dispose);
@@ -118,6 +132,7 @@ void main() {
       final ProviderContainer container = ProviderContainer(
         overrides: <Override>[
           backupServiceProvider.overrideWithValue(fake),
+          ...notificationOverrides(),
         ],
       );
       addTearDown(container.dispose);
@@ -188,4 +203,22 @@ class _FakeBackupService implements BackupService {
   @override
   Future<BackupBytes> exportToBytes(BackupFormat format) =>
       throw UnimplementedError('export is not exercised by this test');
+}
+
+/// In-memory [NotificationSettingsStore] fake.
+///
+/// SettingsView's notifications section loads settings through this store; the
+/// restore-confirmation flow under test does not touch notifications, so a
+/// default (disabled) settings value is all that's needed to let the view
+/// build without reaching a real database.
+class _FakeNotificationSettingsStore implements NotificationSettingsStore {
+  NotificationSettings _settings = const NotificationSettings();
+
+  @override
+  Future<NotificationSettings> load() async => _settings;
+
+  @override
+  Future<void> save(NotificationSettings settings) async {
+    _settings = settings;
+  }
 }

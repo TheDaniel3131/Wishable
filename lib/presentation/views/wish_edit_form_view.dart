@@ -56,6 +56,10 @@
 /// imports Drift or `dart:io`.
 library wishable.presentation.views.wish_edit_form_view;
 
+import 'dart:async';
+import 'dart:typed_data';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -184,6 +188,12 @@ class _WishFormState extends ConsumerState<_WishForm> {
   /// The chosen priority; defaults to Medium in create mode (R1.4, R4.1).
   late Priority _priority;
 
+  /// Images picked in the form but not yet persisted. In create mode they are
+  /// written right after the Wish is created (it needs an id to attach to); in
+  /// edit mode they are also staged here and written on save, keeping one
+  /// consistent flow.
+  final List<_StagedImage> _stagedImages = <_StagedImage>[];
+
   bool get _isCreate => widget.existing == null;
 
   @override
@@ -197,6 +207,34 @@ class _WishFormState extends ConsumerState<_WishForm> {
     _priority = existing?.priority ?? kDefaultPriority;
   }
 
+  /// Picks one or more images and stages them for saving with the form.
+  Future<void> _pickImages() async {
+    final FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      allowMultiple: true,
+      withData: true,
+    );
+    if (result == null) return;
+    final List<_StagedImage> added = <_StagedImage>[];
+    for (final PlatformFile file in result.files) {
+      final Uint8List? bytes = file.bytes;
+      if (bytes == null) continue;
+      added.add(_StagedImage(bytes: bytes, mimeType: _mimeFromName(file.name)));
+    }
+    if (added.isNotEmpty) {
+      setState(() => _stagedImages.addAll(added));
+    }
+  }
+
+  static String _mimeFromName(String name) {
+    final String n = name.toLowerCase();
+    if (n.endsWith('.png')) return 'image/png';
+    if (n.endsWith('.gif')) return 'image/gif';
+    if (n.endsWith('.webp')) return 'image/webp';
+    if (n.endsWith('.heic')) return 'image/heic';
+    return 'image/jpeg';
+  }
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -207,16 +245,10 @@ class _WishFormState extends ConsumerState<_WishForm> {
 
   @override
   Widget build(BuildContext context) {
-    // React to the controller's outcome: navigate away on save, otherwise fall
-    // through to render any inline errors below.
-    ref.listen<AsyncValue<WishEditState>>(
-      wishEditControllerProvider,
-      (AsyncValue<WishEditState>? previous, AsyncValue<WishEditState> next) {
-        if (next.value is WishEditSaved && context.mounted) {
-          _goBack();
-        }
-      },
-    );
+    // Navigation on a successful save is handled explicitly in [_submit] (after
+    // staged images are persisted), so no save-navigation listener is needed
+    // here. The controller state still drives the inline validation errors and
+    // the saving spinner rendered below.
 
     final AsyncValue<WishEditState> editState =
         ref.watch(wishEditControllerProvider);
@@ -294,6 +326,26 @@ class _WishFormState extends ConsumerState<_WishForm> {
           _PrioritySelector(
             value: _priority,
             onChanged: (Priority next) => setState(() => _priority = next),
+          ),
+          const SizedBox(height: 24),
+
+          // Images — pick now; attached on save (R: image upload on create).
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              const _FieldLabel('Images'),
+              TextButton.icon(
+                onPressed: isSaving ? null : _pickImages,
+                icon: const Icon(Icons.add_photo_alternate_outlined),
+                label: const Text('Add'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          _StagedImageStrip(
+            staged: _stagedImages,
+            onRemove: (int index) =>
+                setState(() => _stagedImages.removeAt(index)),
           ),
           const SizedBox(height: 32),
 
@@ -391,28 +443,44 @@ class _WishFormState extends ConsumerState<_WishForm> {
     final WishEditController controller =
         ref.read(wishEditControllerProvider.notifier);
 
-    if (_isCreate) {
-      await controller.createWish(
-        WishDraft(
-          title: title,
-          description: description,
-          categoryId: categoryId,
-          priority: _priority,
-        ),
-      );
-    } else {
-      await controller.editWish(
-        widget.existing!.id,
-        WishEdit(
-          title: title,
-          description: description,
-          categoryId: categoryId,
-          priority: _priority,
-        ),
-      );
+    final Wish? saved = _isCreate
+        ? await controller.createWish(
+            WishDraft(
+              title: title,
+              description: description,
+              categoryId: categoryId,
+              priority: _priority,
+            ),
+          )
+        : await controller.editWish(
+            widget.existing!.id,
+            WishEdit(
+              title: title,
+              description: description,
+              categoryId: categoryId,
+              priority: _priority,
+            ),
+          );
+
+    // On validation failure `saved` is null; the form re-renders with inline
+    // errors (surfaced from the controller state) and we stay put.
+    if (saved == null) return;
+
+    // Persist any images staged in the form against the saved Wish's id. In
+    // create mode this is the only moment the id exists.
+    if (_stagedImages.isNotEmpty) {
+      final WishImageController images = ref.read(wishImageControllerProvider);
+      for (final _StagedImage img in _stagedImages) {
+        await images.add(saved.id, img.bytes, img.mimeType);
+      }
     }
-    // Navigation on success is handled by the `ref.listen` on WishEditSaved;
-    // validation failures re-render this form with inline errors.
+
+    // Keep the periodic "keep going" nudge's count accurate after a create/
+    // edit (fire-and-forget; a no-op when notifications are off/unsupported).
+    unawaited(
+        ref.read(notificationControllerProvider.notifier).refreshNudgeCount());
+
+    if (mounted) _goBack();
   }
 
   /// Resolves the selected/typed category to an id, or `null` when the User has
@@ -451,6 +519,74 @@ class _WishFormState extends ConsumerState<_WishForm> {
       return value.errors;
     }
     return const <ValidationError>[];
+  }
+}
+
+/// An image picked in the form but not yet persisted.
+class _StagedImage {
+  const _StagedImage({required this.bytes, required this.mimeType});
+  final Uint8List bytes;
+  final String mimeType;
+}
+
+/// A horizontal strip of staged image thumbnails with a remove button each,
+/// plus an empty-state hint when nothing is staged.
+class _StagedImageStrip extends StatelessWidget {
+  const _StagedImageStrip({required this.staged, required this.onRemove});
+
+  final List<_StagedImage> staged;
+  final void Function(int index) onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    if (staged.isEmpty) {
+      return Text(
+        'No images added. Tap “Add” to attach one or more.',
+        style: theme.textTheme.bodySmall
+            ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+      );
+    }
+    return SizedBox(
+      height: 110,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: staged.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        itemBuilder: (BuildContext context, int index) {
+          return Stack(
+            children: <Widget>[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.memory(
+                  staged[index].bytes,
+                  width: 110,
+                  height: 110,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              Positioned(
+                top: 4,
+                right: 4,
+                child: Material(
+                  color: theme.colorScheme.surface.withValues(alpha: 0.85),
+                  shape: const CircleBorder(),
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: () => onRemove(index),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: Icon(Icons.close,
+                          size: 18, color: theme.colorScheme.error),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
   }
 }
 

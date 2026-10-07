@@ -187,6 +187,33 @@ Then in the app: Settings → Account & sync → sign in / sign up, and use
 
 ---
 
+## 6. Local notifications (optional)
+
+Wishable schedules **local** notifications only — a periodic "keep going" nudge
+and per-wishlist reminders. There is no push server; everything is scheduled
+on-device via `flutter_local_notifications` + `timezone`. Enable them in
+**Settings → Notifications**, then set a reminder from a wishlist's detail
+screen.
+
+Platform support and permission notes:
+
+- **Web:** unsupported by design. The notifications section degrades to a no-op
+  (the toggle reports it's unavailable); nothing to configure.
+- **Android:** needs the `POST_NOTIFICATIONS` runtime permission on Android 13+
+  (API 33). The app requests it when you enable notifications. For exact-time
+  reminders on Android 12+ you may also need the "Alarms & reminders" permission
+  granted in system settings. These are declared by the plugin; if you
+  regenerated the `android/` runner, re-run `flutter pub get` so the manifest
+  merge picks them up.
+- **iOS / macOS:** the OS prompts for notification permission the first time you
+  enable them. Denying it leaves the feature off until granted in system
+  settings.
+- **Windows / Linux:** no explicit permission grant is required; notifications
+  schedule immediately once enabled.
+
+If a platform or the user denies permission, enabling fails gracefully and the
+app stays in the disabled state — no crash, no partial scheduling.
+
 ## Notes & gotchas
 
 - The local app lock (Option A) and remote account (Option B) are independent:
