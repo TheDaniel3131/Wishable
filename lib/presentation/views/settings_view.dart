@@ -34,8 +34,6 @@
 /// operation can be repeated.
 library wishable.presentation.views.settings_view;
 
-import 'dart:typed_data';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -46,6 +44,7 @@ import '../../theme/app_theme.dart';
 import '../account/account_view.dart';
 import '../auth/auth_gate.dart';
 import '../auth/passcode_setup_view.dart';
+import 'export_delivery.dart';
 
 /// The Settings screen exposing backup export and restore import controls.
 class SettingsView extends ConsumerStatefulWidget {
@@ -211,29 +210,23 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
       return;
     }
     try {
-      final String? path = await FilePicker.platform.saveFile(
+      final ExportDeliveryResult result = await deliverExport(
+        bytes: content.bytes,
+        suggestedFileName: content.suggestedFileName,
         dialogTitle: 'Export ${_formatLabel(format)}',
-        fileName: content.suggestedFileName,
-        type: FileType.custom,
-        allowedExtensions: <String>[_extensionOf(format)],
-        bytes: Uint8List.fromList(content.bytes),
       );
       if (!mounted) return;
-      if (path == null) {
-        // On web, saveFile returns null even on success (the browser handles
-        // the download), so only show "saved to <path>" when we actually got
-        // one; otherwise confirm the download generically.
-        _showSnackBar(
-          'Exported ${content.wishCount} '
-          '${content.wishCount == 1 ? 'wishlist' : 'wishlists'} '
-          '(${content.suggestedFileName}).',
-        );
-      } else {
-        _showSnackBar(
-          'Exported ${content.wishCount} '
-          '${content.wishCount == 1 ? 'wishlist' : 'wishlists'} to $path.',
-        );
+      if (!result.delivered) {
+        // User cancelled the folder picker — nothing written.
+        return;
       }
+      final String where = result.location != null
+          ? ' to ${result.location}'
+          : ' (${content.suggestedFileName})';
+      _showSnackBar(
+        'Exported ${content.wishCount} '
+        '${content.wishCount == 1 ? 'wishlist' : 'wishlists'}$where.',
+      );
     } catch (error) {
       if (mounted) {
         _showSnackBar('Export failed: $error', isError: true);
@@ -367,13 +360,6 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
         BackupFormat.database => 'database backup',
         BackupFormat.json => 'JSON export',
         BackupFormat.csv => 'CSV export',
-      };
-
-  /// The file extension (without leading dot) associated with [format].
-  static String _extensionOf(BackupFormat format) => switch (format) {
-        BackupFormat.database => 'sqlite',
-        BackupFormat.json => 'json',
-        BackupFormat.csv => 'csv',
       };
 
   /// Infers a [BackupFormat] from a file [path]'s extension, or `null` when
