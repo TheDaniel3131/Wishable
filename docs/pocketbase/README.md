@@ -19,6 +19,25 @@ the PocketBase releases page, then run it:
 For a real deployment, run the binary on a small VPS / Fly.io / Railway and put
 it behind HTTPS. The app only needs the public base URL.
 
+### Deploy to Fly.io
+
+A ready-to-use Fly.io deployment lives in [`deploy/fly/`](../../deploy/fly/)
+(Dockerfile + `fly.toml` + step-by-step README). In short:
+
+```powershell
+cd deploy/fly
+fly launch --no-deploy                                   # create the app
+fly volumes create pb_data --size 1 --region <region>    # persistent storage
+fly deploy                                               # ship it
+```
+
+Then create the admin at `https://<app>.fly.dev/_/`, set up the collections
+below, and point the app at the URL with
+`--dart-define=WISHABLE_PB_URL=https://<app>.fly.dev`. Two rules keep it
+healthy: a persistent volume mounted at `/pb/pb_data`, and exactly **one**
+machine (embedded SQLite can't be shared). Full details in
+[`deploy/fly/README.md`](../../deploy/fly/README.md).
+
 ## 2. Configure collections
 
 Open the Admin UI and create the following, matching what the adapter expects

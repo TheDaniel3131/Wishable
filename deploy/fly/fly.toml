@@ -1,0 +1,31 @@
+# Fly.io config for the Wishable PocketBase backend.
+#
+# IMPORTANT: PocketBase uses embedded SQLite, so this app must run on exactly
+# ONE machine. Never scale it to multiple instances against the same volume.
+#
+# Replace `app` and `primary_region` with the values `fly launch` assigns you.
+
+app = "wishable-pb"
+primary_region = "sea"
+
+[build]
+
+# Persistent storage. The volume named `pb_data` (created with
+# `fly volumes create pb_data`) is mounted where the Dockerfile tells
+# PocketBase to keep its data (--dir=/pb/pb_data).
+[[mounts]]
+  source = "pb_data"
+  destination = "/pb/pb_data"
+
+[http_service]
+  internal_port = 8090
+  force_https = true
+  # Keep PocketBase always-on so sync has no cold-start latency. Set
+  # auto_stop_machines = "stop" to save cost at the price of a cold start.
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
