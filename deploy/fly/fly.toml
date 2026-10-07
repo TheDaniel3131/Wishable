@@ -4,7 +4,7 @@
 #
 
 app = "wishable"
-primary_region = "sea"
+primary_region = "sin"
 
 [build]
 [http_service]
