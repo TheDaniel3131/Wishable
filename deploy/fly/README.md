@@ -34,7 +34,7 @@ fly auth login   # or: fly auth signup
 ### 2. Create the app (no deploy yet)
 
 ```powershell
-fly launch --no-deploy
+fly launch --no-deploy (try this if not work: fly launch --no-deploy --name wishable)
 ```
 
 Pick an app name and a region. Decline any Postgres/Redis offers. Update the
