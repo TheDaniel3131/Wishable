@@ -7,6 +7,11 @@ app = "wishable"
 primary_region = "sin"
 
 [build]
+
+[mounts]
+  source = "pb_data"
+  destination = "/pb/pb_data"
+
 [http_service]
   internal_port = 8090
   force_https = true
